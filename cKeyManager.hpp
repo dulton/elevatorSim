@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ public:
       if(cit == keysPressed.end()) {
          return false;
       } else {
-         return cit->second;;
+         return cit->second;
       }
    }
 };

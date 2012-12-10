@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,14 @@
 
 #include "ElevatorSim.hpp"
 
+#include <GL/glut.h>
+
 namespace elevatorSim {
 
 class cRenderObjs {
+
    friend class SimulationState;
-
    static bool m_bIsInit;
-
    cRenderObjs();
 
 public:
@@ -49,6 +50,7 @@ public:
    static const GLfloat ELEV_GAP_WIDTH;
    static const GLfloat GFX_ELEV_SCALE_HEIGHT;
    static const GLfloat GFX_ELEV_SCALE_WIDTH;
+   static const GLfloat GFX_FLOOR_QUEUE_SCALE_WIDTH;
 
    enum OBJ_LIST {
       OBJ_PLANE = 1,
@@ -65,6 +67,10 @@ public:
    void initPlane();
    void initElevator();
    void initHuman();
+
+   static void renderOccupants(int num,
+            int maxOccupants, bool forFloor = true);
+   static void drawBitmapText(char *string,float x,float y,float z);
 };
 
 } /* namespace elevatorSim */

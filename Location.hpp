@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
 
 #ifndef _LOCATION_H
 #define _LOCATION_H
+
+#include "ElevatorSim.hpp"
 
 namespace elevatorSim {
 
@@ -66,7 +68,6 @@ public:
 
    /* public methods */
    int getYVal() const;
-
 };
 
 } /* namespace elevatorSim */

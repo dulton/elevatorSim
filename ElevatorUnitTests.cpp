@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
  * those of the authors and should not be interpreted as representing official 
  * policies, either expressed or implied, of the FreeBSD Project.
  */
- 
+
 #include "Elevator.hpp"
 #include "Building.hpp"
 
@@ -41,13 +41,13 @@ using namespace elevatorSim;
 BOOST_AUTO_TEST_SUITE( elevator_tests )
 
 BOOST_AUTO_TEST_CASE( elevator_initialization_test ) {
-   const unsigned int testStoryCount = 10;
-   const unsigned int testElevCount = 1;
+   const int testStoryCount = 10;
+   const int testElevCount = 1;
 
    Building testBuilding(testStoryCount, testElevCount);
 
    BOOST_REQUIRE_EQUAL( testBuilding.getStories(), testStoryCount );
-   BOOST_REQUIRE_EQUAL( testBuilding.getElevators(), testElevCount );
+   BOOST_REQUIRE_EQUAL( testBuilding.getMaxElev(), testElevCount );
 
    /* TODO: write more elevator specific tests */
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,19 +37,18 @@
 #include "Elevator.hpp"
 #include "ISimulationTerminal.hpp"
 
+#include <algorithm>
+
 namespace elevatorSim {
 
 class Building;
 class Elevator;
 
 class Person : public ISimulationTerminal {
-
    /* friends */
    friend class Building;
    friend class Floor;
    friend class Elevator;
-
-   /* (this person has no friends, trololoo) */
 
    /* private static constants */
    enum PRIORITY {
@@ -62,7 +61,7 @@ class Person : public ISimulationTerminal {
    /* private static methods */
 
    /* private instance members */
-   Location current;
+   Location start;
    Location destination;
    enum PRIORITY priority;
 
@@ -70,9 +69,9 @@ class Person : public ISimulationTerminal {
 
    /* constructors */
    Person(
-         Location startLoc,
-         Location dest,
-         enum PRIORITY p=UNKNOWN);
+      Location startLoc,
+      Location dest,
+      enum PRIORITY p=UNKNOWN);
 
 public:
 
@@ -82,21 +81,45 @@ public:
 
    ~Person();
 
-   /* public methods */
-   Location getCurrent();
-   void setCurrent(Location newLoc);
+   /* public const methods */
+   Location getDestination() const {
+      return destination;
+   }
 
-   Location getDestination();
-   void setDestination(Location newLoc);
-
-   enum PRIORITY getPriority();
-   void setPriority(enum PRIORITY newPriority);
+   enum PRIORITY getPriority() const {
+      return priority;
+   }
 
    /* public methods inherited from ISimulationTerminal*/
    void init();
    void render();
    void update();
 
+   void updateTuple() {
+      if(pythonRepr != NULL) {
+         freeTuple();
+      }
+
+      pythonRepr = Py_BuildValue("(ii)", start.getYVal(), destination.getYVal());
+
+      if(isDebugBuild()) {
+         std::stringstream dbgSS;
+         dbgSS << "created tuple at: " << pythonRepr << std::endl;
+         LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+      }
+
+      if(PyErr_Occurred()) {
+         PyErr_Print();
+      }
+
+      assert(pythonRepr != NULL);
+   }
+
+   void freeTuple() {
+      Py_CLEAR(pythonRepr);
+   }
+
+   IPersonCarrier* locateContainer() const;
 };
 
 } /* namespace elevatorSim */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,11 @@
 #include "cKeyManager.hpp"
 #include "cTimeManager.hpp"
 #include "SimulationState.hpp"
+#include "Logger.hpp"
 
 #include <FL/Enumerations.H>
+#include <GL/glut.h>
+#include <sstream>
 
 namespace elevatorSim {
 
@@ -53,22 +56,27 @@ void cCameraManager::init()
    m_vecCamUp.Set(0.0f, 1.0f, 0.0f);
 
    Vec3f lookingVec = m_vecCamPos - m_vecCamLookAt;
-   Vec3f right = GetRight();
+   Vec3f right = getRight();
    Vec3f::Cross3(m_vecCamUp, right, lookingVec);
 
    m_fPitchAngle = 0.f;
    m_fYawAngle = 0.f;
    m_fRollAngle = 0.f;
+
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "initializing camera manager @" << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
+   }
 }
 
-void cCameraManager::update()
-{
+void cCameraManager::update() {
    /* TODO: use timeManager.getLastFrameTime().total_milliseconds() */
 
    float move = MOVE;
    float rot = ROT;
 
-   Vec3f right = GetRight() * move;
+   Vec3f right = getRight() * move;
    cKeyManager& keyManager = SimulationState::acquire().getKeyManager();
 
    if(keyManager.isDown(FL_Page_Up)) {
@@ -93,34 +101,36 @@ void cCameraManager::update()
 
    if(keyManager.isDown(FL_Up)) {
       m_vecCamPos.z = m_vecCamPos.z - move;
+      m_vecCamLookAt.z = m_vecCamLookAt.z - move;
    }
 
    if(keyManager.isDown(FL_Down)) {
       m_vecCamPos.z = m_vecCamPos.z + move;
+      m_vecCamLookAt.z = m_vecCamLookAt.z + move;
    }
 
    if(keyManager.isDown('w')) {
-      Pitch(-rot);
+      pitch(-rot);
    }
 
    if(keyManager.isDown('s')) {
-      Pitch(rot);
+      pitch(rot);
    }
 
    if(keyManager.isDown('a')) {
-      Yaw(-rot);
+      yaw(-rot);
    }
 
    if(keyManager.isDown('d')) {
-      Yaw(rot);
+      yaw(rot);
    }
 
    if(keyManager.isDown('r')) {
-      Roll(-rot);
+      roll(-rot);
    }
 
    if(keyManager.isDown('f')) {
-      Roll(rot);
+      roll(rot);
    }
 
    if(keyManager.isDown(' ')) {
@@ -136,26 +146,26 @@ void cCameraManager::render()
    glRotatef(m_fRollAngle, 0, 0, 1);
 
    gluLookAt(m_vecCamPos.x, m_vecCamPos.y, m_vecCamPos.z,
-         m_vecCamLookAt.x, m_vecCamLookAt.y, m_vecCamLookAt.z,
-         m_vecCamUp.x, m_vecCamUp.y, m_vecCamUp.z);
+            m_vecCamLookAt.x, m_vecCamLookAt.y, m_vecCamLookAt.z,
+            m_vecCamUp.x, m_vecCamUp.y, m_vecCamUp.z);
 }
 
-void cCameraManager::Yaw(float fAngle)
+void cCameraManager::yaw(float fAngle)
 {
    m_fYawAngle += fAngle;
 }
 
-void cCameraManager::Pitch(float fAngle)
+void cCameraManager::pitch(float fAngle)
 {
    m_fPitchAngle += fAngle;
 }
 
-void cCameraManager::Roll(float fAngle)
+void cCameraManager::roll(float fAngle)
 {
    m_fRollAngle += fAngle;
 }
 
-Vec3f cCameraManager::GetRight()
+Vec3f cCameraManager::getRight()
 {
    Vec3f right;
    Vec3f lookingVec = m_vecCamPos - m_vecCamLookAt;

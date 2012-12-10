@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-
 #include "ElevatorSim.hpp"
 #include "ElevatorSimWindow.hpp"
 #include "SimulationState.hpp"
@@ -40,6 +39,7 @@
 #include <boost/chrono.hpp>
 
 #include <boost/program_options.hpp>
+
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -47,9 +47,19 @@
 using namespace elevatorSim;
 
 void compute();
-void parseArgs(int argc, char** argv);
+bool parseArgs(int argc, char** argv);
 
 int main(int argc, char** argv) {
+   if(!parseArgs(argc, argv)) {
+      /*
+       * Debug builds on windows use AllocConsole() and redirect standard
+       * iostreams to it, so this ugly bullshit is required.
+       */
+      std::cout << "press enter to continue..." << std::endl;
+      std::cin.get();
+      return 1;
+   }
+
    glutInit(&argc, argv);
 
    Logger::acquire();
@@ -57,18 +67,9 @@ int main(int argc, char** argv) {
 
    LOG_INFO(Logger::SUB_GENERAL, "logger starting up");
 
-   /* output version info of libraries */
-   std::cout << "built with: " << std::endl
-      << "boost v" << BOOST_LIB_VERSION << std::endl
-      << "fltk v" << FL_MAJOR_VERSION << "_"
-      << FL_MINOR_VERSION << FL_PATCH_VERSION << std::endl
-      << "python v" << PY_MAJOR_VERSION << "_" << PY_MINOR_VERSION << std::endl;
-
-   parseArgs(argc, argv);
    srand(time(0)); /* TODO: use Boost.Random */
 
    SimulationState::acquire();
-
    ElevatorSimWindow* mainWin = new ElevatorSimWindow();
    mainWin -> show();
 
@@ -79,18 +80,18 @@ int main(int argc, char** argv) {
 
    delete mainWin;
 
-   LOG_INFO(Logger::SUB_GENERAL, "logger shutting down");
-
    SimulationState::release();
-   Logger::release();
    Py_Finalize();
-
+   LOG_INFO(Logger::SUB_GENERAL, "shutting down");
+   Logger::release();
+   IPersonCarrier::cleanContainerCache();
    return 0;
 }
 
 void compute() {
    /* TODO: move this into a different file */
-   static boost::chrono::milliseconds waitDuration(10); /* TODO: make this a const */
+   /* TODO: make this a variable */
+   static boost::chrono::milliseconds waitDuration(20);
    SimulationState& simState = SimulationState::acquire();
 
    while( simState.getState() != SimulationState::SIMULATION_KILLED ) {
@@ -99,14 +100,15 @@ void compute() {
    }
 }
 
-void parseArgs(int argc, char** argv) {
+bool parseArgs(int argc, char** argv) {
    using namespace boost::program_options;
+   bool shouldContinue = true;
 
    try {
       options_description desc("Allowed options");
       desc.add_options()
-         ("help", "produce help message")
-         ("verbose", "verbose flag");
+                  ("help", "produce help message")
+                  ("verbose", "verbose flag");
 
       variables_map vm;
       store(parse_command_line(argc, argv, desc), vm);
@@ -114,16 +116,17 @@ void parseArgs(int argc, char** argv) {
 
       if (vm.count("help")) {
          std::cout << desc << std::endl;
-         return;
-      }
-
-      if (vm.count("verbose")) {
+         shouldContinue = false;
+      } else if (vm.count("verbose")) {
          Logger::acquire().setAllSubsystems(Logger::LOG_INFO);
       }
    } catch(std::exception& e) {
       std::cerr << "error: " << e.what() << std::endl;
-      return;
+      shouldContinue = false;
    } catch(...) {
       std::cerr << "Exception of unknown type" << std::endl;
+      shouldContinue = false;
    }
+
+   return shouldContinue;
 }

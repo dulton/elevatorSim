@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
 
 namespace elevatorSim {
 
-
-const double cTimeManager::redrawInterval = 0.001; /* TODO: use boost to avoid ambiguity */
+/* TODO: use boost to avoid ambiguity */
+const double cTimeManager::redrawInterval = 0.001;
 
 cTimeManager::cTimeManager() {
    init();
@@ -47,6 +47,7 @@ void cTimeManager::init() {
    m_dwLimitTime = m_dwCurrTime + boost::posix_time::seconds(1);
    totalFrames = 0;
    secondFrames = 0;
+   FPS = 0;
 }
 
 void cTimeManager::update() {

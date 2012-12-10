@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,19 +33,24 @@
 #define _FLOOR_H
 
 #include "ElevatorSim.hpp"
+#include "ISimulationTerminal.hpp"
+#include "IPersonCarrier.hpp"
+#include "IPersonCarrier.hpp"
 #include "Location.hpp"
 #include "Person.hpp"
-#include "ISimulationTerminal.hpp"
 #include "Building.hpp"
 
 #include <vector>
+#include <set>
 
 namespace elevatorSim {
 
 class Building;
 class Person;
+class IPersonCarrier;
 
-class Floor : public Location, public ISimulationTerminal {
+class Floor :
+         public Location, public ISimulationTerminal, public IPersonCarrier {
 
    /* friends */
    friend class Building;
@@ -55,9 +60,12 @@ class Floor : public Location, public ISimulationTerminal {
    /* private static methods */
 
    /* private instance members */
-   std::vector<Person> occupants;
    bool signalingUp;
    bool signalingDown;
+
+   /* private const instance members */
+   const int thisFloor;
+   const GLfloat gfxScaleWidth;
    const bool hasUpperFloor;
    const bool hasLowerFloor;
 
@@ -65,9 +73,11 @@ class Floor : public Location, public ISimulationTerminal {
 
    /* constructors */
    Floor(
-      int _yVal,
-      bool _hasUpperFloor = false,
-      bool _hasLowerFloor = false);
+            int _yVal,
+            int _thisFloor,
+            float _gfxScaleWidth,
+            bool _hasUpperFloor = false,
+            bool _hasLowerFloor = false  );
 
 public:
 
@@ -83,6 +93,20 @@ public:
    void render();
    void update();
 
+   void updateTuple() {
+      pythonRepr = peopleToTuple();
+   }
+
+   void freeTuple() {
+
+   }
+
+   /* public class-local methods */
+   void updateSignalArrows();
+
+   enum PERSON_CARRIER_TYPE getCarrierType() const {
+      return IPersonCarrier::FLOOR_CARRIER; 
+   }
 };
 
 } /* namespace elevatorSim */

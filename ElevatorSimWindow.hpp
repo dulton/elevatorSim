@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,8 @@
 #include "ElevatorSim.hpp"
 #include "ElevatorSimRenderWindow.hpp"
 #include "ElevatorSimWelcomeWindow.hpp"
+#include "ElevatorSimStartWindow.hpp"
+#include "ElevatorSimResultsWindow.hpp"
 #include "cTimeManager.hpp"
 #include "cKeyManager.hpp"
 
@@ -44,6 +46,7 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Text_Buffer.H>
 
 namespace elevatorSim {
 
@@ -54,7 +57,7 @@ class ElevatorSimWindow : public Fl_Window {
    void buildMenu();
    void buildButtons();
    void buildDialogs();
-   void buildWelcomeWin();
+   void updateButtonAvailability();
 
    /* private static methods */
    static void windowCloseCB(Fl_Window* w, void* userData);
@@ -71,21 +74,23 @@ class ElevatorSimWindow : public Fl_Window {
    static void quitCancelledCB(Fl_Button* noButton, void* data);
    static void dismissHelpCB(Fl_Widget* w, void* userData);
    static void dismissAboutCB(Fl_Widget* w, void* userData);
-   static void toggleButtons(ElevatorSimWindow* userData);
+
+   static void aboutTextPredeleteCB( int pos, int nDeleted, void* cbArg);
+   static void aboutTextModifyCB(
+            int pos, int nInserted, int nDeleted,
+            int nRestyled, const char* deletedText,
+            void* cbArg);
 
    /* private members */
    ElevatorSimRenderWindow* renderWindow;
    ElevatorSimWelcomeWindow* welcomeWin;
+   ElevatorSimStartWindow* startWin;
+   ElevatorSimResultsWindow* resultsWin;
 
    /* quit confirmation widgets */
    Fl_Window* confirmDialog;
    Fl_Button* yesButton;
    Fl_Button* noButton;
-
-   /*Begin wigets */
-   Fl_Window* beginWin;
-   Fl_Text_Display* beginLabel[2];
-   Fl_Button* beginDoneButton;
 
    /* help widgets */
    Fl_Window* helpWin;
@@ -94,7 +99,8 @@ class ElevatorSimWindow : public Fl_Window {
 
    /*About widgets*/
    Fl_Window* aboutWin;
-   Fl_Text_Display* aboutLabel;
+   Fl_Text_Display* aboutDisplay;
+   Fl_Text_Buffer* aboutTextBuffer;
    Fl_Button* aboutDoneButton;
 
    /* left pane widgets */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,11 +60,19 @@ public:
    void update();
    void render();
 
-   void Yaw(float fAngle);
-   void Pitch(float fAngle);
-   void Roll(float fAngle);
-   
-   Vec3f GetRight();
+   void updateTuple() {
+      /* TODO */
+   }
+
+   void freeTuple() {
+      /* TODO */
+   }
+
+   void yaw(float fAngle);
+   void pitch(float fAngle);
+   void roll(float fAngle);
+
+   Vec3f getRight();
 
    inline Vec3f GetCameraPos() {
       return m_vecCamPos;
@@ -81,4 +89,4 @@ public:
 
 } /* namespace elevatorSim */
 
-#endif //__CCAMERAMANAGER_H__
+#endif /* __CCAMERAMANAGER_H__ */

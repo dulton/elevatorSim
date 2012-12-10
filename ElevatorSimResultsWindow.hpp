@@ -29,26 +29,31 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef _I_STATE_OBJECT_H
-#define _I_STATE_OBJECT_H
+#ifndef _ELEVATOR_SIM_RESULTS_WINDOW_H
+#define _ELEVATOR_SIM_RESULTS_WINDOW_H
+
+#include "ElevatorSim.hpp"
+
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
 
 namespace elevatorSim {
+class ElevatorSimResultsWindow : public Fl_Window {
+   /* fltk callbacks */
 
-struct IStateObject {
-   virtual void init() = 0;
-   virtual void update() = 0;
+   /* user input widgets */
 
-   /*
-    * NOTE: The dtor below is declared pure virtual but also defined in
-    * the corresponding cpp file. It is pure virtual so that invocations
-    * of delete on derived classes will get their own destructors invoked.
-    * Even though it is pure virtual, it still must be defined because it
-    * is implicitly invoked by all dtors of derived types.
-    */
+public:
 
-   virtual ~IStateObject() = 0;
+   /* public static members */
+   const static int WINDOW_WIDTH;
+   const static int WINDOW_HEIGHT;
+   const static char WINDOW_TITLE[];
+
+   ElevatorSimResultsWindow();
+   ~ElevatorSimResultsWindow();
 };
 
 } /* namespace elevatorSim */
 
-#endif /* _I_STATE_OBJECT_H */
+#endif /* _ELEVATOR_SIM_RESULTS_WINDOW_H */

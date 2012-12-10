@@ -29,26 +29,64 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef _I_STATE_OBJECT_H
-#define _I_STATE_OBJECT_H
+#ifndef _I_PERSON_CARRIER_H
+#define _I_PERSON_CARRIER_H
+
+#include <unordered_set>
+#include <unordered_map>
 
 namespace elevatorSim {
+class Person;
 
-struct IStateObject {
-   virtual void init() = 0;
-   virtual void update() = 0;
+class IPersonCarrier {
 
-   /*
-    * NOTE: The dtor below is declared pure virtual but also defined in
-    * the corresponding cpp file. It is pure virtual so that invocations
-    * of delete on derived classes will get their own destructors invoked.
-    * Even though it is pure virtual, it still must be defined because it
-    * is implicitly invoked by all dtors of derived types.
-    */
+   static std::unordered_map<Person*, IPersonCarrier*>* containerCache;
 
-   virtual ~IStateObject() = 0;
+   static std::unordered_map<Person*, IPersonCarrier*>* acquireContainerCache();
+   inline static void invalidateCCEntry( Person * const cp );
+   inline static void updateCCEntry( Person * const cp, IPersonCarrier* icp );
+
+protected:
+
+   std::unordered_set<Person*> people;
+
+public:
+
+   inline static Person* checkContainerCache( Person * const cp );
+   static void cleanContainerCache();
+
+   enum PERSON_CARRIER_TYPE {
+      FLOOR_CARRIER,
+      ELEVATOR_CARRIER
+   };
+
+   bool containsPerson( const Person* const & p ) const {
+      return people.find( const_cast<Person* const &>( p ) ) != people.end();
+   }
+
+   void addPerson( Person * const p ) {
+      std::pair<std::unordered_set<Person*>::iterator, bool> ret =
+               people.insert(p);
+
+      /* ensure that the add succeeded */
+      assert(ret.second);
+   }
+
+   bool removePerson( Person* p ) {
+      return ( people.erase(p) > 0 );
+   }
+
+   PyObject* peopleToTuple() const;
+
+   int numPeopleContained() const {
+      return people.size();
+   }
+
+   virtual enum PERSON_CARRIER_TYPE getCarrierType() const = 0;
+
+   virtual ~IPersonCarrier() = 0;
 };
 
 } /* namespace elevatorSim */
 
-#endif /* _I_STATE_OBJECT_H */
+#endif /* _I_PERSON_CARRIER_H */

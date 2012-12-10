@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,10 @@
 namespace elevatorSim   {
 
 const GLfloat cRenderObjs::BUILDING_GAP_HEIGHT = 1.1f;
-const GLfloat cRenderObjs::ELEV_GAP_WIDTH = 1.7f;
+const GLfloat cRenderObjs::ELEV_GAP_WIDTH = 1.4f;
 const GLfloat cRenderObjs::GFX_ELEV_SCALE_HEIGHT = 1.0f;
 const GLfloat cRenderObjs::GFX_ELEV_SCALE_WIDTH = 0.75f;
+const GLfloat cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH = 2.f;
 
 bool cRenderObjs::m_bIsInit = false;
 
@@ -137,77 +138,56 @@ void cRenderObjs::initSphere()
 {
    glNewList(OBJ_SPHERE, GL_COMPILE);
 
-   /*
-    * glEnable(GL_MATERIAL);
-    *
-    * GLfloat amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
-    * GLfloat dif[4] = {0.5f, 0.5f, 0.5f, 1.0f};
-    * GLfloat spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-    * GLfloat shi = 0.5f;
-    * GLfloat emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-    * glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
-    * glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
-    * glMaterialfv(GL_FRONT, GL_SPECULAR, spe);
-    * glMaterialf(GL_FRONT, GL_SHININESS, shi);
-    * glMaterialfv(GL_FRONT, GL_EMISSION, emi);
-    */
-
    glutSolidSphere(0.4, 50, 25);
 
-
-   /*
-    * GLfloat zero[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    * glMaterialfv(GL_FRONT, GL_DIFFUSE, zero);
-    *
-    * glDisable(GL_MATERIAL);
-    */
    glEndList();
 }
 
 void cRenderObjs::initElevator()
 {
+   static const GLfloat amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+   static const GLfloat dif[4] = {0.2f, 0.8f, 0.2f, 1.0f};
+   static const GLfloat spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+   static const GLfloat shi = 0.3f;
+   static const GLfloat emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+
    glNewList(OBJ_ELEVATOR, GL_COMPILE);
 
-   GLfloat amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
-   GLfloat dif[4] = {0.2f, 0.8f, 0.2f, 1.0f};
-   GLfloat spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-   GLfloat shi = 0.3f;
-   GLfloat emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
    glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
    glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
    glMaterialfv(GL_FRONT, GL_SPECULAR, spe);
    glMaterialf(GL_FRONT, GL_SHININESS, shi);
    glMaterialfv(GL_FRONT, GL_EMISSION, emi);
 
+   /* Left wall of Elevator */
    glPushMatrix();
-   // Left wall of Elevator
    glTranslatef(-GFX_ELEV_SCALE_WIDTH, 0, 0.f);
    glScalef(0.05f, GFX_ELEV_SCALE_HEIGHT, 1.0f);
    glCallList(OBJ_CUBE);
    glPopMatrix();
 
-   // Right wall of Elevator
+   /* Right wall of Elevator */
    glPushMatrix();
    glTranslatef(GFX_ELEV_SCALE_WIDTH, 0, 0.f);
    glScalef(0.05f, GFX_ELEV_SCALE_HEIGHT, 1.0f);
    glCallList(OBJ_CUBE);
    glPopMatrix();
 
-   // Back wall of Elevator
+   /* Back wall of Elevator */
    glPushMatrix();
    glTranslatef(0, 0, -1.0f);
    glScalef(GFX_ELEV_SCALE_WIDTH, GFX_ELEV_SCALE_HEIGHT, 0.05f);
    glCallList(OBJ_CUBE);
    glPopMatrix();
 
-   // Top wall of Elevator
+   /* Top wall of Elevator */
    glPushMatrix();
    glTranslatef(0, GFX_ELEV_SCALE_HEIGHT, 0.0f);
    glScalef(GFX_ELEV_SCALE_WIDTH, 0.05f, 1.0f);
    glCallList(OBJ_CUBE);
    glPopMatrix();
 
-   // Bottom wall of Elevator
+   /* Bottom wall of Elevator */
    glPushMatrix();
    glTranslatef(0, -GFX_ELEV_SCALE_HEIGHT, 0.0f);
    glScalef(GFX_ELEV_SCALE_WIDTH, 0.05f, 1.0f);
@@ -220,17 +200,6 @@ void cRenderObjs::initElevator()
 void cRenderObjs::initHuman()
 {
    glNewList(OBJ_HUMAN, GL_COMPILE);
-
-   GLfloat amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
-   GLfloat dif[4] = {0.2f, 0.2f, 0.8f, 1.0f};
-   GLfloat spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-   GLfloat shi = 0.5f;
-   GLfloat emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-   glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, spe);
-   glMaterialf(GL_FRONT, GL_SHININESS, shi);
-   glMaterialfv(GL_FRONT, GL_EMISSION, emi);
 
    glScalef(0.4f, 0.4f, 0.4f);
 
@@ -275,5 +244,97 @@ void cRenderObjs::initHuman()
 
    glEndList();
 }
+
+void cRenderObjs::renderOccupants(int num, int maxOccupants, bool forFloor)
+{
+   if(num > 0)   {
+      GLfloat human_amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+      GLfloat human_dif[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+      GLfloat human_spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+      GLfloat human_shi = 0.5f;
+      GLfloat human_emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+      float perc = (float)num / maxOccupants;
+
+      if(perc > 0.8f)   {
+         human_dif[0] = 1.0f, human_dif[1] = 0.0f, human_dif[2] = 0.0f;
+      }
+      else  {
+
+
+         human_dif[0] = 0.9f * perc;
+         human_dif[2] = 0.9f * (1.0f - perc);
+      }
+
+      glMaterialfv(GL_FRONT, GL_AMBIENT, human_amb);
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, human_dif);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, human_spe);
+      glMaterialf(GL_FRONT, GL_SHININESS, human_shi);
+      glMaterialfv(GL_FRONT, GL_EMISSION, human_emi);
+
+      float posx = 0.f;
+
+      if(forFloor)   {
+         posx = 0.5f;
+      }
+
+      else  {
+         posx = 0.22f;
+      }
+
+      if(perc <= 0.33f) {
+         glPushMatrix();
+         glCallList(cRenderObjs::OBJ_HUMAN);
+         glPopMatrix();
+      }
+
+      else if(perc <= 0.66f) {
+         glPushMatrix();
+         glTranslatef(posx, 0.f, 0.f);
+         glCallList(cRenderObjs::OBJ_HUMAN);
+         glPopMatrix();
+
+         glPushMatrix();
+         glTranslatef(-posx, 0.f, 0.f);
+         glCallList(cRenderObjs::OBJ_HUMAN);
+         glPopMatrix();
+      }
+
+      else{
+         glPushMatrix();
+         glTranslatef(posx, 0.f, -0.15f);
+         glCallList(cRenderObjs::OBJ_HUMAN);
+         glPopMatrix();
+
+         glPushMatrix();
+         glTranslatef(-posx, 0.f, -0.15f);
+         glCallList(cRenderObjs::OBJ_HUMAN);
+         glPopMatrix();
+
+         glPushMatrix();
+         glTranslatef(0.f, 0.f, 0.15f);
+         glCallList(cRenderObjs::OBJ_HUMAN);
+         glPopMatrix();
+      }
+   }
+}
+
+void cRenderObjs::drawBitmapText(char *string,float x,float y,float z)
+{  
+   glDisable(GL_LIGHTING);
+   glDisable(GL_LIGHT0);
+
+   char *c;
+   glRasterPos3f(x, y, z);
+
+   for (c=string; *c != '\0'; c++) 
+   {
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, *c);
+   }
+
+   glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHT0);
+}
+
 
 } /* namespace elevatorSim */

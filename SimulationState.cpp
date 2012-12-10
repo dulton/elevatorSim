@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,11 +36,15 @@
 #include "cRenderObjs.hpp"
 #include "cCameraManager.hpp"
 #include "Building.hpp"
+#include "Logger.hpp"
 
+#include <boost/thread/mutex.hpp>
 #include <set>
 #include <functional>
 #include <cassert>
-#include <boost/thread/mutex.hpp>
+#include <sstream>
+#include <string>
+#include <fstream>
 
 namespace elevatorSim   {
 
@@ -52,21 +56,41 @@ SimulationState::SimulationState() : cState(SimulationState::SIMULATION_STARTING
    stateObjects.insert((cameraManager = new cCameraManager()));
    stateObjects.insert((building = new Building()));
 
-   renderObjs = new cRenderObjs();
+   userScriptCodeObject = NULL;
+   userScriptExecModule = NULL;
+   userComputeFunction = NULL;
+
+   renderObjs = NULL;
+   logicTicks = 0;
 }
 
 SimulationState::~SimulationState() {
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "starting to destroy simulation state @ " << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+   }
+
+   init();
+
    delete building;
 
    delete cameraManager;
    delete renderObjs;
    delete keyManager;
    delete timeManager;
+
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "finished destroying simulation state @ " << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+   }
 }
 
 SimulationState& SimulationState::acquire() {
    if(simulationState == NULL) {
       simulationState = new SimulationState();
+      simulationState -> init();
    }
 
    return *simulationState;
@@ -79,26 +103,265 @@ void SimulationState::release() {
 }
 
 void SimulationState::init() {
-   cState = SIMULATION_RUNNING;
+   cState = SIMULATION_STARTING;
+   logicTicks = 0;
 
-   /* TODO */
+   Py_CLEAR(userScriptCodeObject);
+   Py_CLEAR(userScriptExecModule);
+   Py_CLEAR(userComputeFunction);
 }
 
 void SimulationState::update() {
+   bigAssStateMutex.lock();
 
-   /* lambdas are sexy */
+   if( cState == SIMULATION_RUNNING ) {
+      std::for_each(
+         stateObjects.begin(),
+         stateObjects.end(),
+         [] (IStateObject * stateObj) {
+            stateObj -> update();
+      });
 
-   bigAssStateMutex.lock(); /* massive mutexes are not */
-
-   std::for_each(
-      stateObjects.begin(),
-      stateObjects.end(),
-      [] (IStateObject * stateObj) { 
-         stateObj -> update();
-   });
+      ++logicTicks;
+   }
 
    bigAssStateMutex.unlock();
+}
+
+void SimulationState::start(
+   int numElevators,
+   int numFloors,
+   int randomSeed,
+   const std::string& pyAiPath ) {
+      assert(
+         userScriptCodeObject == NULL && 
+         userScriptExecModule == NULL &&
+         userComputeFunction == NULL);
+
+      bigAssStateMutex.lock();
+
+      /* cRenderObjs */
+
+      init();
+
+      /* load and compile python */
+      if( loadPythonScript( pyAiPath ) ) {
+
+         timeManager->init();
+         keyManager->init();
+         cameraManager->init();
+
+         stateObjects.erase(building);
+         delete building;
+         building = new Building(numFloors, numElevators);
+         stateObjects.insert(building);
+
+         srand(randomSeed);
+
+         cState = SIMULATION_RUNNING;
+      }
+
+      bigAssStateMutex.unlock();
+}
+
+void SimulationState::runUserScriptUnsafe() {
+   assert( userComputeFunction != NULL );
+
+   building->updateTuple();
+   PyObject* computeFunctionArgs = building->getTuple();
+   
+   if(isDebugBuild()) {
+      LOG_INFO( Logger::SUB_ELEVATOR_LOGIC, "invoking python on user script..." );
+   }
+
+   PyObject* computeFunctionResult = 
+      PyObject_CallObject(
+         userComputeFunction,
+         computeFunctionArgs);
+
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "created object at: " << computeFunctionResult << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+   }
+
+   if(computeFunctionResult == NULL || PyErr_Occurred()) {
+      PyErr_Print();
+
+      if(isDebugBuild()) {
+         LOG_ERROR( Logger::SUB_ELEVATOR_LOGIC, 
+            "error occurred while attempting to call python object!" );
+      }
+
+   } else {
+      if(isDebugBuild()) {
+         LOG_INFO( Logger::SUB_ELEVATOR_LOGIC, 
+            "got valid result from python. parsing..." );
+      }
+
+      int numSignals = PyTuple_Size(computeFunctionResult);
+
+      for( int i = 0; i < numSignals; ++i ) {
+         PyObject* signalTuple = PyTuple_GetItem(computeFunctionResult, i);
+
+         if( !PyTuple_Check(signalTuple) || PyTuple_Size( signalTuple ) != 2 ) {
+            LOG_ERROR( Logger::SUB_ELEVATOR_LOGIC,
+               "got invalid signal tuple. discarding...");
+         } else {
+            PyObject* elevNumObj = PyTuple_GetItem(signalTuple, 0);
+            PyObject* elevDestObj = PyTuple_GetItem(signalTuple, 1);
+
+            if(elevNumObj == NULL || elevDestObj == NULL ) {
+               PyErr_Print();
+
+               LOG_ERROR( Logger::SUB_ELEVATOR_LOGIC,
+                  "couldn't parse signal tuple to a pair of ints. check python code.");
+            } else {
+
+               int elevNum = PyLong_AsLong(elevNumObj);
+               int elevDest = PyLong_AsLong(elevDestObj);
+
+               if(isDebugBuild()) {
+                  std::stringstream dbgSS;
+
+                  dbgSS << "signal pair from python: " << elevNum
+                     << " " << elevDest << std::endl;
+
+                  LOG_ERROR( Logger::SUB_ELEVATOR_LOGIC, 
+                     sstreamToBuffer(dbgSS) );
+               }
+
+               dispatchElevatorToFloor( 
+                  elevNum, 
+                  elevDest);
+            }
+         } /* else signal tuple is valid */
+      } /* for each signal */
+   } /* if computeFunction result was invalid */
+
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "XDECREF on " << computeFunctionResult << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+   }
+
+   Py_XDECREF(computeFunctionResult);
+}
+
+void SimulationState::dispatchElevatorToFloor( const int elev, const int floor ) {
+
 
 }
+
+bool SimulationState::togglePause() {
+   bool ret = false;
+   bigAssStateMutex.lock();
+
+   if( cState != SIMULATION_RUNNING && cState != SIMULATION_PAUSED ) {
+      ret = false;      
+   } else {
+
+      if( cState == SIMULATION_PAUSED ) {
+         ret = false;
+         cState = SIMULATION_RUNNING;
+      } else {
+         ret = true;
+         cState = SIMULATION_PAUSED;
+      }
+   }
+
+   bigAssStateMutex.unlock();
+   return ret;
+}
+
+void SimulationState::stop() {
+   bigAssStateMutex.lock();
+   init();
+   cState = SIMULATION_READY;
+
+   /* TODO: post-process simulation data */
+
+   bigAssStateMutex.unlock();
+}
+
+const char SimulationState::USER_SCRIPT_PY_NAME[] = "elevatorSim";
+const char SimulationState::USER_SCRIPT_PY_FUNC_NAME[] = "computeNextMove";
+
+PyObject* SimulationState::simStateToTuple() {
+
+
+   return NULL;
+}
+
+void SimulationState::decrefSimStateTuple(PyObject* simStateTuple) {
+   (void) simStateTuple;
+}
+
+bool SimulationState::loadPythonScript( const std::string& pyAiPath ) {
+   std::string pyBuffer;
+   std::ifstream pyScriptFile( pyAiPath.c_str(), std::ifstream::in );
+
+   if (!pyScriptFile.is_open()) {
+      LOG_ERROR( Logger::SUB_GENERAL, "couldn't open script file");
+      return false;
+   }
+
+   while ( pyScriptFile.good() ) {
+      std::string lineBuffer;
+      getline (pyScriptFile, lineBuffer);
+      pyBuffer += (lineBuffer + '\n');
+   }
+
+   pyScriptFile.close();
+
+   /* compile the string into a code object */
+   userScriptCodeObject =
+      Py_CompileString(
+         pyBuffer.c_str(),
+         pyAiPath.c_str(),
+         Py_file_input);
+
+   if( userScriptCodeObject == NULL ) {
+      PyErr_Print();
+      return false;
+   }
+   
+   /*
+    * std::cerr << "Code object: ";
+    * PyObject_Print( userScriptCodeObject, stderr, 0);
+    * std::cerr << std::endl;
+    */
+
+   userScriptExecModule = PyImport_ExecCodeModule(
+      (char*) USER_SCRIPT_PY_NAME, userScriptCodeObject );
+
+   if( userScriptExecModule == NULL ) {
+      PyErr_Print();
+      Py_CLEAR(userScriptCodeObject);
+      return false;
+   }
+
+   /*
+    * std::cerr << "Executable module: ";
+    * PyObject_Print( userScriptExecModule, stderr, 0);
+    * std::cerr << std::endl;
+    */
+
+   userComputeFunction = 
+      PyObject_GetAttrString( 
+         userScriptExecModule, 
+         USER_SCRIPT_PY_FUNC_NAME );
+
+   if( userComputeFunction == NULL || 
+      !PyCallable_Check(userComputeFunction)) {
+         PyErr_Print();
+         Py_CLEAR(userScriptExecModule);
+         Py_CLEAR(userScriptCodeObject);
+         Py_CLEAR(userComputeFunction);
+         return false;
+   }  
+
+   return true;
+} 
 
 } /* namespace elevatorSim */

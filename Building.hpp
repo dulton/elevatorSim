@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,10 @@
 #include "Elevator.hpp"
 #include "ISimulationTerminal.hpp"
 
+#include <GL/glut.h>
+#include <set>
+#include <vector>
+
 namespace elevatorSim{
 class Floor;
 class Elevator;
@@ -45,17 +49,20 @@ class Building : public ISimulationTerminal {
 
    /* friends */
 
-   /* private static constants */
-   const unsigned int m_nStory;
-   const unsigned int m_nElevator;
-
    /* private static methods */
 
    /* private instance members */
-   Floor** m_Floors;
-   Elevator** m_Elevators;
+   std::vector<Floor*> floors;
+   std::vector<Elevator*> elevators;
+   PyObject* elevatorsTuple;
+   PyObject* floorsTuple;
 
    /* private methods */
+
+protected:
+
+   template <class T> PyObject* createTupleFromMember( 
+      const std::vector<T*>& memberRef ) const;
 
 public:
 
@@ -66,9 +73,12 @@ public:
    const GLfloat gfxScaleWidth;
    const GLfloat gfxEachFloorHeight;
    const GLfloat gfxEachElevWidth;
+   const int invPersonArriveProb;
 
    /* constructors */
-   Building(unsigned int _nStory = 20, unsigned int _nElevator = 5);
+   Building(unsigned int _nStory = 4,
+            unsigned int _nElevator = 2,
+            int _invPersonArriveProb = 100);
    ~Building();
 
    /* public methods inherited from ISimulationTerminal */
@@ -76,20 +86,26 @@ public:
    void render();
    void update();
 
+   void updateTuple();
+   void freeTuple();
+
+   void distributePeople();
+
    /* inline const accessors */
-   inline unsigned int getStories() const {
-      return m_nStory;
+   inline int getStories() const {
+      return floors.size();
    }
 
-   inline unsigned int getElevators() const {
-      return m_nElevator;
+   int getMaxElev() const {  
+      return elevators.size();
    }
+
+   std::vector<Floor*>& getFloors() { return floors; }
+   std::vector<Elevator*>& getElevators() { return elevators; }
 
    int getMaxElevHeight() const;
    int getMinElevHeight() const;
 
-   int getMaxElev()  {  return m_nElevator;  }
-   Elevator** getElev() {  return m_Elevators;  }
 };
 
 } /* namespace elevatorSim */

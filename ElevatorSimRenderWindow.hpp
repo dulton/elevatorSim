@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,15 +70,18 @@ class ElevatorSimRenderWindow : public Fl_Gl_Window {
    void glInit();
    void setViewport();
    void setPerspective(
-         GLdouble fovy,
-         GLdouble aspect,
-         GLdouble zNear,
-         GLdouble zFar);
+            GLdouble fovy,
+            GLdouble aspect,
+            GLdouble zNear,
+            GLdouble zFar);
 
    void drawFPS(int fps, int totalFrames);
    void drawText(const char * const str, float x, float y);
-   void mouseClicked(int x, int y);
    void rayCasting(int x, int y);
+
+   /* public methods */
+   ElevatorSimRenderWindow(
+            int X, int Y, int W, int H, const char* Label = 0);
 
 public:
 
@@ -92,9 +95,7 @@ public:
 
    /* public instance members */
 
-   /* public methods */
-   ElevatorSimRenderWindow(
-      int X, int Y, int W, int H, const char* Label = 0);
+   ~ElevatorSimRenderWindow();
 
    void draw();
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,11 +36,13 @@
 #include "Location.hpp"
 #include "Person.hpp"
 #include "ISimulationTerminal.hpp"
+#include "IPersonCarrier.hpp"
 #include "cRenderObjs.hpp"
 #include "Building.hpp"
 #include "SimulationState.hpp"
 
 #include <vector>
+#include <set>
 #include <utility>
 
 namespace elevatorSim {
@@ -48,9 +50,12 @@ namespace elevatorSim {
 class Location;
 class Building;
 class Person;
+class Floor;
 struct SimulationTerminal;
+class IPersonCarrier;
 
-class Elevator : public Location, public ISimulationTerminal {
+class Elevator :
+         public Location, public ISimulationTerminal, public IPersonCarrier {
 
    /* friends */
    friend class Building;
@@ -59,32 +64,38 @@ class Elevator : public Location, public ISimulationTerminal {
 
    /* private static methods */
 
-   /* private instance members */
+   /* private const instance members */
    const int maxVel;
    const int maxAccel;
    const int maxOccupants;
-   const int numFloors;
-
-   const int stoppingDistance;
    const int accelTimeInterval;
+   const int stoppingDistance;
 
+   /* private instance members */
    int currentVel;
    int currentAccel;
-   int destFloor;
-   bool* floorsSignaled;
+   int closeDoorTimer;
 
-   std::vector<Person> occupants;
+   bool peopleOffAnimation;
+   bool peopleOnAnimation;
+
+   int peopleOffCounter;
+   int peopleOnCounter;
+   float peopleOnOffPosX;
+
+   std::vector<int> scheduledFloors;
    std::vector<std::pair<int, int>> scheduledAccels;
 
    /* private methods */
 
    /* constructor */
    Elevator(
-      int _yVal,
-      const int _numFloors,
-      const int _maxVel = DEFAULT_MAX_VEL,
-      const int _maxAccel = DEFAULT_MAX_ACCEL,
-      const int _maxOccupants = DEFAULT_MAX_OCCUPANTS);
+            int _yVal,
+            const int _maxVel = DEFAULT_MAX_VEL,
+            const int _maxAccel = DEFAULT_MAX_ACCEL,
+            const int _maxOccupants = DEFAULT_MAX_OCCUPANTS);
+
+   void scheduleAccelsToFloor( const int srcFloor, const int destfloor );
 
 public:
 
@@ -92,6 +103,8 @@ public:
    static const int DEFAULT_MAX_VEL;
    static const int DEFAULT_MAX_ACCEL;
    static const int DEFAULT_MAX_OCCUPANTS;
+   static const int DEFAULT_MAX_ANI_COUNTER;
+   static const int DEFAULT_DOOR_CLOSE_DELAY;
 
    /* public instance members */
 
@@ -101,15 +114,55 @@ public:
    /* public methods */
    bool canStopAtNextFloor();
    void goToFloor(int floor);
+   int getCurrentFloor();
+
+   bool isStopped() const {
+      return (currentVel == 0);
+   };
+
+   inline bool isFull() const {
+      return (maxOccupants <= numPeopleContained()?true:false);
+   }
+
+   /* fancy animation turn on function */
+   inline void peopleGetOnAnimationOn() {
+      peopleOnAnimation = true;
+      peopleOnCounter = DEFAULT_MAX_ANI_COUNTER;
+   }
+
+   inline void peopleGetOffAnimationOn() {
+      peopleOffAnimation = true;
+      peopleOffCounter = 0;
+   }
+
+   inline void peopleGetOnOffAnimationOff() {
+      peopleOnAnimation = false;
+      peopleOffAnimation = false;
+   }
+
+   enum PERSON_CARRIER_TYPE getCarrierType() const {
+      return IPersonCarrier::ELEVATOR_CARRIER; 
+   }
 
    /* inherited from SimulationTerminal */
    void init();
    void render();
    void update();
-   void generateRandomDest();
 
+   /* public methods inherited fomr IPersonCarrier */
+   void updateTuple() {
+      if(pythonRepr != NULL) {
+         freeTuple();
+      }
+
+      pythonRepr = peopleToTuple();
+   }
+
+   void freeTuple() {
+      Py_CLEAR(pythonRepr);
+   }
 };
 
 } /* namespace elevatorSim */
 
-#endif
+#endif /* _ELEVATOR_H */

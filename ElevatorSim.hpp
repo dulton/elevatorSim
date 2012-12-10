@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,6 @@
 #ifndef _ELEVATOR_SIM_H
 #define _ELEVATOR_SIM_H
 
-/* TODO: clang pragmas */
-
-#pragma warning(disable: 4244; disable: 4512; disable: 4211; disable: 4913)
-
-#pragma GCC diagnostic ignored "-Wpadded"
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-
 #include "Logger.hpp"
 
 #include <Python.h>
@@ -46,20 +39,42 @@
 #include <string>
 
 #if defined(_ES_WINNT)
+#pragma warning(\
+   disable: 4244;\
+   disable: 4512;\
+   disable: 4211;\
+   disable: 4127;\
+   disable: 4913;\
+   disable: 4100)
 #include <Windows.h>
 #include <gl/GL.h>
 #include <gl/GLU.h>
+#include "icon_resource.h"
 #elif defined(_ES_DARWIN)
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wconditional-uninitialized"
+#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic ignored "-Wpadded"
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma clang diagnostic ignored "-Wshift-sign-overflow"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wundef"
+#pragma clang diagnostic ignored "-Wlong-long"
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma clang diagnostic ignored "-Wglobal-constructors"
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
 #include <unistd.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #elif defined(_ES_UNIX)
 #include <unistd.h>
+#include <GL/glut.h>
+#pragma GCC diagnostic ignored "-Wpadded"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #else
 #error Unspecified operating system. Use the makefile.
 #endif
-
-#include <FL/glut.H>
 
 namespace elevatorSim {
 inline bool isDebugBuild() {

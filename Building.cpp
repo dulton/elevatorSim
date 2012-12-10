@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,44 +36,91 @@
 #include "cRenderObjs.hpp"
 #include "Logger.hpp"
 
+#include <GL/glut.h>
 #include <iostream>
+#include <set>
 #include <sstream>
+#include <vector>
 #include <cassert>
+#include <string>
 
 namespace elevatorSim {
+
+template <class T> PyObject* 
+   Building::createTupleFromMember( const std::vector<T*>& memberRef ) const {
+      /* instantiate a tuple for containing all of the floors */
+      PyObject* memberItemTuple = PyTuple_New( memberRef.size() );
+
+      if(isDebugBuild()) {
+         std::stringstream dbgSS;
+         dbgSS << "created tuple at: " << memberItemTuple << std::endl;
+         LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+      }
+
+      if( memberItemTuple == NULL || PyErr_Occurred() ) {
+         PyErr_Print();
+      }
+
+      assert( memberItemTuple != NULL );
+
+      /* iterate over each floor, telling it to update its tuple */
+      int i = 0;
+      for( std::vector<T*>::const_iterator iter = memberRef.begin(); 
+      iter != memberRef.end();
+      ++iter) {
+         T* const currentItemGeneric = *iter;
+         ISimulationTerminal* currentItemTyped 
+            = static_cast<ISimulationTerminal*>(currentItemGeneric);
+         currentItemTyped->updateTuple();
+         PyTuple_SET_ITEM(memberItemTuple, i, currentItemTyped->stealTuple());
+         ++i;
+      }
+
+      return memberItemTuple;
+}
+
 /* constructors */
-Building::Building(unsigned int _nStory, unsigned int _nElevator) :
-   m_nStory(_nStory),
-   m_nElevator(_nElevator),
-   gfxScaleHeight(_nStory * cRenderObjs::BUILDING_GAP_HEIGHT),
-   gfxScaleWidth(_nElevator * cRenderObjs::ELEV_GAP_WIDTH),
-   gfxEachFloorHeight(gfxScaleHeight * 2 / _nStory ),
-   gfxEachElevWidth(gfxScaleWidth * 2 / _nElevator) {
+Building::Building(unsigned int _nStory,
+         unsigned int _nElevator,
+         int _invPersonArriveProb) :
+                  gfxScaleHeight(_nStory * cRenderObjs::BUILDING_GAP_HEIGHT),
+                  gfxScaleWidth(_nElevator * cRenderObjs::ELEV_GAP_WIDTH),
+                  gfxEachFloorHeight(gfxScaleHeight * 2 / _nStory ),
+                  gfxEachElevWidth(gfxScaleWidth * 2 / _nElevator),
+                  invPersonArriveProb(_invPersonArriveProb) {
 
-      if(isDebugBuild()) {
-         std::stringstream dbgSS;
-         dbgSS << "in Building(" << _nStory << ", " << _nElevator
-            << ") with address @" << this << std::endl;
-         LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
-      }
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "in Building(" << _nStory << ", " << _nElevator
+               << ") with address @" << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
+   }
 
-      m_Floors = new Floor * [m_nStory];
-      m_Elevators = new Elevator * [m_nElevator];
+   floors = std::vector<Floor*> (_nStory);
 
-      for(unsigned int i=0; i < m_nStory ; ++i) {
-         m_Floors[i] = new Floor(
-            i * Floor::YVALS_PER_FLOOR, i != m_nStory-1, i != 0 );
-      }
+   for(unsigned int i=0; i < _nStory ; ++i) {
+      floors[i] =
+               new Floor(
+                        i * Floor::YVALS_PER_FLOOR,
+                        i,
+                        gfxScaleWidth,
+                        i != _nStory-1,
+                        i != 0);
+   }
 
-      for(unsigned int i=0; i < m_nElevator ; ++i ) {
-         m_Elevators[i] = new Elevator(0, _nStory);
-      }
+   elevators = std::vector<Elevator*> (_nElevator);
+   for(unsigned int i=0; i < _nElevator ; ++i ) {
+      elevators[i] = new Elevator(0);
+   }
 
-      if(isDebugBuild()) {
-         std::stringstream dbgSS;
-         dbgSS << "finished constructing building @" << this << std::endl;
-         LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
-      }
+   elevatorsTuple = NULL;
+   floorsTuple = NULL;
+
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "finished constructing building @" << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
+   }
 }
 
 Building::~Building() {
@@ -83,52 +130,66 @@ Building::~Building() {
       LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
    }
 
-   for(unsigned int i=0; i < m_nStory ; ++i) {
-      delete m_Floors[i];
+   for(std::vector<Floor*>::iterator iter = floors.begin();
+            iter != floors.end();
+   ) {
+      Floor* currentFloor = *iter;
+      iter = floors.erase(iter++);
+      delete currentFloor;
    }
 
-   for(unsigned int i=0; i < m_nElevator ; ++i ) {
-      delete m_Elevators[i];
+   for(std::vector<Elevator*>::iterator iter = elevators.begin();
+            iter != elevators.end();
+   ) {
+      Elevator* currentElevator = *iter;
+      iter = elevators.erase(iter++);
+      delete currentElevator;
    }
 
-   delete [] m_Floors;
-   delete [] m_Elevators;
+   freeTuple();
 }
 
 /* public methods inherited from SimulationTerminal */
 void Building::init() {
-   for(unsigned int i=0; i < m_nStory ; ++i) {
-      m_Floors[i]->init();
-   }
+   std::for_each(
+            floors.begin(),
+            floors.end(),
+            [] (Floor * thisFloor ) {
+      thisFloor -> init();
+   });
 
-   for(unsigned int i=0; i < m_nElevator ; ++i ) {
-      m_Elevators[i]->init();
-   }
+   std::for_each(
+            elevators.begin(),
+            elevators.end(),
+            [] (Elevator * thisElevator ) {
+      thisElevator -> init();
+   });
 }
 
 void Building::render() {
    glLoadIdentity();
-   glTranslatef(0.0f, -2.0f, 0.0f);
+   glTranslatef(2.0f, -2.0f, -1.2f * elevators.size());
 
    /* TODO: move these values into Building as members */
-   static GLfloat amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
-   static GLfloat dif[4] = {0.5f, 0.5f, 0.5f, 1.0f};
-   static GLfloat spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-   static GLfloat shi = 0.5f;
-   static GLfloat emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+   static const GLfloat amb[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+   static const GLfloat dif[4] = {0.5f, 0.5f, 0.5f, 1.0f};
+   static const GLfloat spe[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+   static const GLfloat shi = 0.5f;
+   static const GLfloat emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
    glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, spe);
-	glMaterialf(GL_FRONT, GL_SHININESS, shi);
-	glMaterialfv(GL_FRONT, GL_EMISSION, emi);
+   glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
+   glMaterialfv(GL_FRONT, GL_SPECULAR, spe);
+   glMaterialf(GL_FRONT, GL_SHININESS, shi);
+   glMaterialfv(GL_FRONT, GL_EMISSION, emi);
 
    /* adding waiting queue */
-   float queueScale = 2.f;
 
    /* Left wall */
    glPushMatrix();
-   glTranslatef(-gfxScaleWidth - queueScale*2, gfxScaleHeight, 0.f);
+   glTranslatef(
+            -gfxScaleWidth - cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH*2,
+            gfxScaleHeight, 0.f);
    glScalef(0.1f, gfxScaleHeight, 2.0f);
    glCallList(cRenderObjs::OBJ_CUBE);
    glPopMatrix();
@@ -142,81 +203,150 @@ void Building::render() {
 
    /* Back wall */
    glPushMatrix();
-   glTranslatef(0 - queueScale, gfxScaleHeight, -2.0f);
-   glScalef(gfxScaleWidth + queueScale, gfxScaleHeight, 0.1f);
+   glTranslatef(
+            0 - cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH,
+            gfxScaleHeight, -2.0f);
+   glScalef(
+            gfxScaleWidth + cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH,
+            gfxScaleHeight, 0.1f);
    glCallList(cRenderObjs::OBJ_CUBE);
    glPopMatrix();
 
    /* Top wall */
    glPushMatrix();
-   glTranslatef(0.0f - queueScale, gfxScaleHeight*2, 0.0f);
-   glScalef(gfxScaleWidth + queueScale, 0.1f, 2.0f);
+   glTranslatef(
+            0.0f - cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH,
+            gfxScaleHeight*2,
+            0.0f);
+   glScalef(
+            gfxScaleWidth +
+            cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH,
+            0.1f, 2.0f);
    glCallList(cRenderObjs::OBJ_CUBE);
    glPopMatrix();
 
-   /* Draw each floor */
-   for(unsigned int i=0; i < m_nStory - 1; i++) {
+   /* Shafts */
+   for(int i=0; i<getMaxElev(); i++)
+   {
       glPushMatrix();
-      glTranslatef(0.0f - queueScale, gfxEachFloorHeight * (i+1), 0.f);
-      glScalef(gfxScaleWidth + queueScale, 0.1f, 2.0f);
-
-      m_Floors[i]->render();
-
+      glTranslatef(-gfxScaleWidth + gfxEachElevWidth * i,
+               gfxScaleHeight, -0.65f);
+      glScalef(0.1f, gfxScaleHeight, .8f);
+      glCallList(cRenderObjs::OBJ_CUBE);
       glPopMatrix();
    }
 
-   /* Draw each floor person indicator */
-   /* TODO: move this into Floor::render */
-   for(unsigned int i=0; i < m_nStory ; i++) {
+
+   /* Draw each floor */
+   for(unsigned int i=0; i < floors.size(); i++) {
       glPushMatrix();
-      glTranslatef(-gfxScaleWidth-2.0f, gfxEachFloorHeight * i + 1.0f, 0.0f);
-      glCallList(cRenderObjs::OBJ_HUMAN);
+      glTranslatef(
+               0.0f - cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH,
+               gfxEachFloorHeight * i, 0.f);
+
+      floors[i]->render();
+
       glPopMatrix();
    }
 
    /* Draw each elevator */
-   for(unsigned int i=0; i < m_nElevator; i++) {
+   for(unsigned int i=0; i < elevators.size(); i++) {
       glPushMatrix();
       glTranslatef(
-         -gfxScaleWidth + cRenderObjs::ELEV_GAP_WIDTH + gfxEachElevWidth * i,
-         /* this is in the logical coordinate system,
-          * so we divide it by YVALS_PER_FLOOR */
-         1.0f +
-         (GLfloat)m_Elevators[i]->getYVal() /
-         Floor::YVALS_PER_FLOOR *
-         gfxEachFloorHeight,
-         0.0f);
+               -gfxScaleWidth + cRenderObjs::ELEV_GAP_WIDTH +
+               gfxEachElevWidth * i,
+               /* this is in the logical coordinate system,
+                * so we divide it by YVALS_PER_FLOOR */
+               1.0f +
+               (GLfloat)elevators[i]->getYVal() /
+               Floor::YVALS_PER_FLOOR *
+               gfxEachFloorHeight,
+               0.0f);
 
       /*
        * elev height is on interval
        * [1.0f, 1.0f + (m_nElevator - 1) * gfxEachFloorHeight]
        */
 
-      m_Elevators[i]->render();
+      elevators[i]->render();
       glPopMatrix();
-
    }
 
    /* Render land */
    glPushMatrix();
-   glScalef(4.0f + (m_nElevator * 2.0f), 0.0f, 10.0f);
+   glTranslatef(-cRenderObjs::GFX_FLOOR_QUEUE_SCALE_WIDTH, 0.f, 0.f);
+   glScalef(4.0f + (elevators.size() * 2.0f), 0.0f, 10.0f);
    glCallList(cRenderObjs::OBJ_PLANE);
    glPopMatrix();
 }
 
-void Building::update()
-{
-   for(unsigned int i = 0; i < m_nStory; i++) {
-      m_Floors[i]->update();
+void Building::update() {
+   std::for_each(
+            floors.begin(),
+            floors.end(),
+            [] (Floor* thisFloor) { thisFloor -> update(); });
+
+   std::for_each(
+            elevators.begin(),
+            elevators.end(),
+            [] (Elevator* thisElevator ) { thisElevator -> update(); });
+
+   distributePeople();
+}
+
+void Building::updateTuple() {
+   if( pythonRepr != NULL ) {
+      freeTuple();
    }
 
-   for(unsigned int i = 0; i < m_nElevator; i++) {
-      m_Elevators[i]->update();
+   floorsTuple = createTupleFromMember(floors);
+   elevatorsTuple = createTupleFromMember(elevators);
+   pythonRepr = Py_BuildValue("(OO)", floorsTuple, elevatorsTuple);
+
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "created tuple at: " << pythonRepr << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+   }
+
+   if( pythonRepr == NULL || PyErr_Occurred() ) {
+      PyErr_Print();
+   }
+}
+
+void Building::freeTuple() {
+   if( pythonRepr == NULL ) {
+      return;
+   }
+
+   assert(PyObject_Size(pythonRepr) == 2);
+
+   Py_CLEAR(pythonRepr);
+
+   Py_CLEAR(elevatorsTuple);
+   Py_CLEAR(floorsTuple);
+}
+
+void Building::distributePeople() {
+   /* roll the dice to see if we'll be adding a person */
+   if( rand() % invPersonArriveProb == 0 ) {
+      /* pick a random source floor */
+      const int sourceFloor = rand() % floors.size();
+      int destFloor;
+
+      /* pick a different random dest floor */
+      while( (destFloor = rand() % floors.size()) == sourceFloor );
+
+      /* allocate a new person off the heap */
+      Person* newPerson = new Person(sourceFloor, destFloor);
+
+      /* add the new randomly generated occupant */
+      floors[sourceFloor]->addPerson(newPerson);
    }
 }
 
 int Building::getMaxElevHeight() const {
-   return (m_nStory - 1) * Floor::YVALS_PER_FLOOR;
+   return ((floors.size() - 1) * Floor::YVALS_PER_FLOOR);
 }
 
 int Building::getMinElevHeight() const {

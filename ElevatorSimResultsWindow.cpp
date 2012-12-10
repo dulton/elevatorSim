@@ -29,26 +29,39 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef _I_STATE_OBJECT_H
-#define _I_STATE_OBJECT_H
+#include "ElevatorSim.hpp"
+#include "ElevatorSimResultsWindow.hpp"
+#include "SimulationState.hpp"
+#include "Logger.hpp"
+
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_File_Chooser.H>
+
+#include <boost/lexical_cast.hpp>
+#include <fstream>
 
 namespace elevatorSim {
 
-struct IStateObject {
-   virtual void init() = 0;
-   virtual void update() = 0;
+/* public static member initializers */
+const char ElevatorSimResultsWindow::WINDOW_TITLE[] = "Simulation Report";
+const int ElevatorSimResultsWindow::WINDOW_WIDTH = 512;
+const int ElevatorSimResultsWindow::WINDOW_HEIGHT = 316;
 
-   /*
-    * NOTE: The dtor below is declared pure virtual but also defined in
-    * the corresponding cpp file. It is pure virtual so that invocations
-    * of delete on derived classes will get their own destructors invoked.
-    * Even though it is pure virtual, it still must be defined because it
-    * is implicitly invoked by all dtors of derived types.
-    */
+/* public methods */
+ElevatorSimResultsWindow::ElevatorSimResultsWindow() :
+            Fl_Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE) {
 
-   virtual ~IStateObject() = 0;
-};
+}
+
+ElevatorSimResultsWindow::~ElevatorSimResultsWindow() {
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "finished destroying results window @ " << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer(dbgSS) );
+   }
+}
 
 } /* namespace elevatorSim */
-
-#endif /* _I_STATE_OBJECT_H */

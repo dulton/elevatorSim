@@ -1,11 +1,3 @@
-    ________                __             _____ _         
-   / ____/ /__ _   ______ _/ /_____  _____/ ___/(_)___ ___ 
-  / __/ / / _ \ | / / __ `/ __/ __ \/ ___/\__ \/ / __ `__ \
- / /___/ /  __/ |/ / /_/ / /_/ /_/ / /   ___/ / / / / / / /
-/_____/_/\___/|___/\__,_/\__/\____/_/   /____/_/_/ /_/ /_/ 
-
-############################################################# 
-
 All builds are classified as 3-tuples. The 3-tuple consists of the cpu architecture, the host 
 operating system family, and the compiler name and version separated by periods. So, the major 
 supported build for this project currently is (x86, winnt, msvc2010), or x86.winnt.msvc2010.
@@ -14,29 +6,14 @@ For tier one platforms, pre-cooked libraries are included in-tree and so buildin
 as invoking (n)make. For other platforms building is still possible but more work will be required.
 Due to time constraints, an elaborate build system is a low priority item.
 
-Also note that static linking is used whenever possible (for both boost and fltk) on windows,
-where sane loadable library support is conscpicuously absent. On unixlike systems all 
-linked libraries are imported dynamically.
-
-The build files for each supported OS family are segregated by git branch. See below.
-
-master:     winnt
-osx_only:   darwin
-linux_only: linux
-
 Dependencies:
-   Libraries:
-      boost 1.50+ AND
-      fltk 1.3.0+ AND
-      python 3.1+
-   Compilers:
-      msvc2010+ OR
-      gcc4.7+ OR
-      clang3.3+   
+    boost 1.51.0/boost 1.50
+    fltk 1.3.0
+    python 3.3
 
 Tier one platforms: x86.winnt.msvc2010
 
-BUILDING ON WINDOWS:
+to build for this T1 3-tuple, the easy way:
 
 1. double click on elevatorSim.sln
 2. click the green 'play button'
@@ -61,20 +38,41 @@ if the build succeeds, the resulting statically linked binary will reside in the
 
 Tier two platforms: x86_64 debian linux
 
-BUILDING ON DEBIAN LINUX:
-
-git checkout linux_only
+To build on debian linux:
 
 aptitude install libboost1.50-dev-all libfltk1.3-dev libfltk1.3-compat-headers
 cd /path/to/elevatorSim
 make -f makefile.x86_64.linux.gcc4
 
-BUILDING ON OS X:
+NOTES FOR BUILDING DEPENDENCIES ON WINDOWS ( You probably won't have to do this ):
 
-install sufficient versions of fltk, python3, and boost manually
-cd /path/to/elevatorSim
-make -f makefile.x86_64.darwing.clang3x
+Only 32 bit targets have been tested.
+All compiles below assume vcvarsall x86.
 
-NOTE FOR BUILDING ON GENERIC UNIXES:
+BOOST:
+   These are the proper options to set for building boost libraries for debugging:
 
-you may have to set (DY)LD_LIBRARY_PATH
+   b2.exe --with-chrono --with-program_options --with-system --with-thread --with-test --with-date_time --variant=debug --threading=multi --link=static
+
+   The two paths given at the end of a successful build are the paths you need to write into the makefile.
+
+FLTK:
+   Use the project file for MSVC10 located at fltk-1.xxx\ide\VisualC2010.
+   Build the Win32/Debug target. 
+   You will need to change the name of the pdb files output by the build for each library if you want to be able to debug
+   the fltk routines. This can be done by right clicking on each library solution
+      -> Configuration Properties
+      -> C/C++
+      -> Output Files
+      -> Program Database File Name
+      -> Change it to $(IntDir)_<name of library>d.pdb
+
+   This needs to be done for: fltk, fltkdll, fltkforms, fltkgl, fltkimages, fltkjpeg, fltkpng, and fltkzlib
+   Results will be in $TOP\lib. The pdbs will reside in the same directory as the solution file. You will need both.
+   Refer to http://fltk.org for further documentation.
+
+Python:
+   Use the project file for MSVC10 locate at Python-3.xxx\PCbuild.
+   Build the Win32/Debug target.
+   Results will be in the solution directory.
+   Refer to http://python.org/doc for further documentation.

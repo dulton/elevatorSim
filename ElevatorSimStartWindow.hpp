@@ -29,26 +29,62 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef _I_STATE_OBJECT_H
-#define _I_STATE_OBJECT_H
+#ifndef _ELEVATOR_SIM_START_WINDOW_H
+#define _ELEVATOR_SIM_START_WINDOW_H
+
+#include "ElevatorSim.hpp"
+
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_File_Chooser.H>
+
+#include <string>
 
 namespace elevatorSim {
+class ElevatorSimStartWindow : public Fl_Window {
 
-struct IStateObject {
-   virtual void init() = 0;
-   virtual void update() = 0;
+   /* private methods */
+   int handle(int event);
 
-   /*
-    * NOTE: The dtor below is declared pure virtual but also defined in
-    * the corresponding cpp file. It is pure virtual so that invocations
-    * of delete on derived classes will get their own destructors invoked.
-    * Even though it is pure virtual, it still must be defined because it
-    * is implicitly invoked by all dtors of derived types.
-    */
+   static bool validateSimulationParams(
+            const int numElev,
+            const int numFloor,
+            const int rSeed,
+            const std::string& pyAiPath);
 
-   virtual ~IStateObject() = 0;
+   /* fltk callbacks */
+   static void browseCB(Fl_Button* b, void* userData);
+   static void inputAcceptCB(Fl_Window*  w, void* userData);
+   static void inputCancelCB(Fl_Window* w, void* userData);
+   static void fileChosenCB(Fl_File_Chooser* fc, void* userData);
+
+   /* user input widget */
+   Fl_Input* elevatorNumInput;
+   Fl_Input* floorNumInput;
+   Fl_Input* seedNumInput;
+   Fl_Input* elevatorAIPathInput;
+   Fl_File_Chooser* elevatorAIFileChooser;
+   Fl_Button *browseButton;
+   Fl_Button *inputAccept;
+   Fl_Button *inputCancel;
+
+public:
+
+   /* public static members */
+   const static int WINDOW_WIDTH;
+   const static int WINDOW_HEIGHT;
+   const static char WINDOW_TITLE[];
+
+   int getElevatorNum();
+   int getFloorNum();
+   int getSeedNum();
+
+   ElevatorSimStartWindow();
+   ~ElevatorSimStartWindow();
 };
 
 } /* namespace elevatorSim */
 
-#endif /* _I_STATE_OBJECT_H */
+#endif /* _ELEVATOR_SIM_START_WINDOW_H */

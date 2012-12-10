@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,46 +32,42 @@
 #include "ElevatorSim.hpp"
 #include "Person.hpp"
 #include "Location.hpp"
+#include "Logger.hpp"
+#include "SimulationState.hpp"
+
+#include <algorithm>
+#include <vector>
 
 namespace elevatorSim {
 
 /* constructors */
 Person::Person(
-      Location startLoc,
-      Location dest,
-      enum PRIORITY p) {
-   priority = p;
-   current = startLoc;
-   destination = dest;
+   Location startLoc,
+   Location dest,
+   enum PRIORITY p) {
+      start = startLoc;
+      destination = dest;
+      priority = p;
+
+      /* print debug info */
+      if(isDebugBuild()) {
+         std::stringstream dbgSS;
+         dbgSS << "with person @ " << this
+            << " start " << start.getYVal()
+            << ", dest " << destination.getYVal()
+            << ", pri = " << (int)priority << std::endl;
+
+         LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
+      }
 }
 
 Person::~Person() {
-
-}
-
-/* getters and setters */
-enum Person::PRIORITY Person::getPriority() {
-   return priority;
-}
-
-void Person::setPriority(enum Person::PRIORITY newPriority) {
-   priority = newPriority;
-}
-
-Location Person::getCurrent() {
-   return current;
-}
-
-void Person::setCurrent(Location newLoc) {
-   current = newLoc;
-}
-
-Location Person::getDestination() {
-   return destination;
-}
-
-void Person::setDestination(Location newLoc) {
-   destination = newLoc;
+   /* print debug info */
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << "destructing person @ " << this << std::endl;
+      LOG_INFO( Logger::SUB_MEMORY, sstreamToBuffer( dbgSS ));
+   }
 }
 
 void Person::init() {
@@ -83,7 +79,117 @@ void Person::render() {
 }
 
 void Person::update() {
-   /* TODO */
+   /* Check to see if we've reached a movement condition. If so,
+   * either move from floor to elevator or from elevator to floor.
+   */
+
+   IPersonCarrier* container = locateContainer();
+   std::vector<Elevator*> elevators = SimulationState::acquire().getBuilding().getElevators();
+   std::vector<Floor*> floors = SimulationState::acquire().getBuilding().getFloors();
+
+   /* we're waiting at floor, so check if there are any elevators currently on this floor,
+   * check to see if an elevator has arrived, and get on if it has
+   */
+   if( container->getCarrierType() == IPersonCarrier::ELEVATOR_CARRIER) {
+      Elevator* elevatorContainer = static_cast<Elevator*> (container);
+
+      /* if our container elevator has got the same yVal as our destination,
+      * we've arrived */
+      if( elevatorContainer->getYVal() == destination.getYVal() ) {
+         int floorIndex = destination.getYVal() / Floor::YVALS_PER_FLOOR;
+
+         /* move ourselves to this floor */
+         floors[floorIndex] -> addPerson( this );
+
+         if(isDebugBuild()) {
+            std::stringstream dbgSS;
+            dbgSS << "removing self from elevator container, "
+               << "num occupants before: " << elevatorContainer -> numPeopleContained()
+               << " ..."
+               << std::endl;
+            LOG_INFO( Logger::SUB_ELEVATOR_LOGIC, sstreamToBuffer( dbgSS ));
+         }
+
+         /* remove ourselves from our containing elevator */
+         assert( elevatorContainer -> removePerson( this ) );
+         elevatorContainer->peopleGetOffAnimationOn();
+
+         if(isDebugBuild()) {
+            std::stringstream dbgSS;
+            dbgSS << "removed self from elevator container, "
+               << "num occupants after: " << elevatorContainer -> numPeopleContained()
+               << std::endl;
+            LOG_INFO( Logger::SUB_ELEVATOR_LOGIC, sstreamToBuffer( dbgSS ));
+         }
+      }
+   }
+
+   else if( container->getCarrierType() == IPersonCarrier::FLOOR_CARRIER ) {
+      Floor* floorContainer = static_cast<Floor*> (container);
+      std::set<Elevator*> candidateElevators;
+
+      /* iterate over all of the elevators and compare their positions to this person's
+      * starting location */
+      std::for_each(
+         elevators.begin(),
+         elevators.end(),
+         [this, &candidateElevators] ( Elevator* thisElevator ) {
+            if(!thisElevator->isFull() && thisElevator -> getYVal() == start.getYVal() * Floor::YVALS_PER_FLOOR ) {
+               /* we've found a candidate elevator, so add it to the set */ 
+               candidateElevators.insert(thisElevator);
+            }
+      });
+
+      /* if there are candidate elevators */
+      if( candidateElevators.size() > 0 ) {
+         /* just pick the first one (for now) */
+
+         /* TODO: choose randomly among available elevators,
+         * (in preparation for making this a scriptable choice) */
+         Elevator * elevatorToBoard  = *candidateElevators.begin();
+
+         /* move ourselves to this elevator */
+         elevatorToBoard -> addPerson( this );
+         elevatorToBoard->peopleGetOnAnimationOn();
+
+         /* remove ourselves from our containing floor */
+         assert( floorContainer -> removePerson( this ) );
+      }
+   } 
+}
+
+IPersonCarrier* Person::locateContainer() const {
+   /* find parent by searching over all floors and elevators,
+    * this operation's worst case runs in linear time, O(E+F),
+    * where E is number of elevators and F is number of Floors.
+    */
+   Building& building = SimulationState::acquire().getBuilding();
+
+   std::vector<Floor*> floors = building.getFloors();
+   std::vector<Elevator*> elevators = building.getElevators();
+
+   IPersonCarrier* container = NULL;
+
+   for(std::vector<Floor*>::const_iterator it = floors.begin();
+      container == NULL && it != floors.end();
+      ++it) {
+         container =
+            ( (Floor*)(*it) -> containsPerson(this) )
+            ? ( (Floor*)(*it) ) : ( NULL );
+   }
+
+   for(std::vector<Elevator*>::const_iterator it = elevators.begin();
+      container == NULL && it != elevators.end();
+      ++it) {
+         container =
+            ( (Elevator*)(*it) -> containsPerson(this) )
+            ? ( (Elevator*)(*it) ) : ( NULL );
+   }
+
+   /* TODO: add std::set<IPeopleCarrier*> building.getPersonCarriers */
+
+   assert( container != NULL );
+   return container;
 }
 
 } /* namespace ElevatorSim */

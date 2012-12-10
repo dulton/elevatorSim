@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@ public:
 
    enum StateKind {
       SIMULATION_STARTING,
+      SIMULATION_READY,
       SIMULATION_RUNNING,
       SIMULATION_PAUSED,
       SIMULATION_KILLED
@@ -81,18 +82,47 @@ public:
    }
 
    void initRenderObjs() {
-      renderObjs->init(); /* TODO: refactor this out */
+      if( renderObjs == NULL ) {
+         renderObjs = new cRenderObjs();
+         renderObjs->init(); /* TODO: refactor this out */
+      }
    }
 
    void init();
    void update();
+
+   void start(
+      int numElevators,
+      int numFloors,
+      int randomSeed,
+      const std::string& pyAiPath );
+
+   void runUserScriptUnsafe();
+   void dispatchElevatorToFloor( const int elev, const int floor );
+
+   bool togglePause();
+
+   void stop();
 
    /* TODO: something more elaborate and safe here */
    inline void notifyKill() {
       cState = SIMULATION_KILLED;
    }
 
-   inline enum StateKind getState() const {
+   enum StateKind getState() {
+      StateKind ret;
+
+      if(bigAssStateMutex.try_lock()) {
+         ret = cState;
+         bigAssStateMutex.unlock();
+      } else {
+         ret = SIMULATION_STARTING;
+      }
+
+      return ret;
+   }
+
+   enum StateKind getStateUnsafe() {
       return cState;
    }
 
@@ -104,8 +134,14 @@ public:
       bigAssStateMutex.unlock();
    }
 
+   inline int getTime() const {
+      return logicTicks;
+   }
+
 private:
-   
+   SimulationState();
+   ~SimulationState();
+
    static SimulationState* simulationState;
 
    std::set<IStateObject*> stateObjects;
@@ -116,11 +152,21 @@ private:
    cKeyManager* keyManager;
    cRenderObjs* renderObjs;
    cCameraManager* cameraManager;
+   int logicTicks;
+
+   static const char USER_SCRIPT_PY_NAME[];
+   static const char USER_SCRIPT_PY_FUNC_NAME[];
+
+   PyObject* simStateToTuple();
+   void decrefSimStateTuple(PyObject* simStateTuple);
+
+   bool loadPythonScript( const std::string& pyAiPath );
+   
 
    Building* building;
-
-   SimulationState();
-   ~SimulationState();
+   PyObject* userScriptCodeObject;
+   PyObject* userScriptExecModule;
+   PyObject* userComputeFunction;
 
 };
 

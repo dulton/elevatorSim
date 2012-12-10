@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Joseph Max DeLiso, Daniel Gilbert
+ * Copyright (c) 2012, Joseph Max DeLiso
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,9 @@ namespace elevatorSim {
 struct ISimulationTerminal : public IStateObject {
    virtual void update() = 0;
 
+   ISimulationTerminal::ISimulationTerminal() {
+      pythonRepr = NULL;
+   }
    /*
     * NOTE: The dtor below is declared pure virtual but also defined in
     * the corresponding cpp file. It is pure virtual so that invocations
@@ -49,6 +52,25 @@ struct ISimulationTerminal : public IStateObject {
     */
 
    virtual ~ISimulationTerminal() = 0;
+
+   /*
+    * All simulation terminals need to be able to create a tuple out of
+    * themselves for processing by the python interpreter. These are the
+    * functions by which this representation is manipulated, as well as
+    * the pointer to the object itself.
+    */
+   PyObject* pythonRepr;
+
+   PyObject* getTuple() { return pythonRepr; }
+
+   PyObject* stealTuple() { 
+      PyObject* pythonReprCopy = pythonRepr; 
+      pythonRepr = NULL;
+      return pythonReprCopy;
+   }
+
+   virtual void updateTuple() = 0;
+   virtual void freeTuple() = 0;
 };
 
 } /* namespace elevatorSim */
