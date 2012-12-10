@@ -4,34 +4,15 @@
 ## os:       darwin
 ## compiler: clang3x
 
-WARN_CXXFLAGS=-Werror #-Weverything
-    
-## you'll need to specify this if you haven't installed boost in a standard location
-BOOST_INC_DIR=#
+## OBJECTS
 
-FLTK_CXXFLAGS=$(shell fltk-config --use-gl --use-glut --cxxflags)
-PYTHON_CXXFLAGS=$(shell python3-config --includes)
-BOOST_CXXFLAGS=-DBOOST_DATE_TIME_NO_LOCALE -I$(BOOST_INC_DIR)
-
-CXXFLAGS=-c -g -std=c++11 $(WARN_CXXFLAGS) $(FLTK_CXXFLAGS) $(PYTHON_CXXFLAGS) $(BOOST_CXXFLAGS) -D_ES_DARWIN
-
-## you'll need to specify this if you haven't installed boost in a standard location
-BOOST_LIB_DIR=#
-
-FLTK_LDFLAGS=$(shell fltk-config --use-gl --use-glut --ldflags)
-PYTHON_LDFLAGS=$(shell python3-config --ldflags)
-BOOST_LDFLAGS=-L$(BOOST_LIB_DIR) -lboost_system -lboost_thread -lboost_chrono -lboost_program_options
-
-LDFLAGS=-lSystem $(FLTK_LDFLAGS) $(PYTHON_LDFLAGS) $(BOOST_LDFLAGS)
-
-CC=clang++
-RM=rm
-OUT=elevatorSim
-UNIT_TEST_OUT=elevatorSimUnitTests
+CLIENT_OBJ=ElevatorSim.o
 
 OBJS=ElevatorSimWindow.o\
 ElevatorSimRenderWindow.o\
 ElevatorSimWelcomeWindow.o\
+ElevatorSimStartWindow.o\
+ElevatorSimResultsWindow.o\
 cRenderObjs.o\
 cTimeManager.o\
 cKeyManager.o\
@@ -43,25 +24,42 @@ Building.o\
 Floor.o\
 ISimulationTerminal.o\
 IStateObject.o\
+IPersonCarrier.o\
 SimulationState.o\
 Logger.o
-
-CLIENT_OBJ=ElevatorSim.o
 
 UNIT_TEST_OBJS=\
 UnitTests.o\
 ElevatorUnitTests.o
 
-$(OUT): $(OBJS) unitTests $(CLIENT_OBJ)
-	$(CC) $(OBJS) $(CLIENT_OBJ) $(LDFLAGS) -o $(OUT)
+## CXXFLAGS ##
+
+BOOST_INSTALL_DIR=/Users/psuguest/local # NOTE: CHANGE THIS TO YOUR OWN PATH
+
+WARN_CXXFLAGS=#-Weverything -Werror
+PY_CXXFLAGS=$(shell python3.3-config --includes)
+FLTK_CXXFLAGS=-I$(shell fltk-config --includedir)
+BOOST_CXXFLAGS=-I$(BOOST_INSTALL_DIR)/include/boost
+
+CXXFLAGS=-c -std=c++11 -D_ES_DARWIN $(WARN_CXXFLAGS) $(PY_CXXFLAGS) $(FLTK_CXXFLAGS)
+
+FRAMEWORKS_LDFLAGS=-framework AppKit -framework Quartz -framework OpenGL -framework GLUT -framework AGL
+PY_LDFLAGS=$(shell python3.3-config --libs)
+FLTK_LDFLAGS=$(shell fltk-config --use-gl --use-glut --libs)
+BOOST_LDFLAGS=-L$(BOOST_INSTALL_DIR)/lib\
+-lboost_iostreams -lboost_system -lboost_thread -lboost_chrono -lboost_program_options
+
+LDFLAGS=-lSystem $(FRAMEWORK_LDFLAGS) $(PY_LDFLAGS) $(FLTK_LDFLAGS) $(BOOST_LDLFAGS)
+
+CXX=clang++
+OUT=elevatorSim
+
+elevatorSim: $(OBJS) $(CLIENT_OBJ)
+	$(CXX) $(OBJS) $(LDFLAGS) -o $(OUT)
 	@echo +success
 
-# TODO: copy over configs from linux makefile
-unitTests:
-	@echo -unimplemented
-
 .cpp.o:
-	$(CC) $(CXXFLAGS) $<
+	$(CXX) $(DEBUGFLAGS) $(CXXFLAGS) $<
     
 clean:
-	$(RM) -f $(OBJS) $(CLIENT_OBJ) $(UNIT_TEST_OBJS) $(OUT) $(UNIT_TEST_OUT)
+	rm -f $(OBJS)

@@ -34,7 +34,7 @@
 
 #include "ElevatorSim.hpp"
 
-#include <GL/glut.h>
+// #include <GL/glut.h>
 
 namespace elevatorSim {
 
