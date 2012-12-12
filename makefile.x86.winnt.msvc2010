@@ -36,9 +36,9 @@ DRIVERFLAGS=/errorreport:none /nologo
 
 # /analyze:WX- you can add this if you've got premium or better
 # (not enabled on express)
-CXXFLAGS=/W4 /WX /EHac /c /D_ES_WINNT /Iinc /Iinc\Python
+CXXFLAGS=/W4 /EHac /c /D_ES_WINNT /Iinc /Iinc\Python
 
-DEBUGFLAGS=/Z7 /Gm- /MDd
+DEBUGFLAGS=/ZI /MDd
 
 RELEASEFLAGS=/0x /DNDEBUG
 
@@ -48,7 +48,6 @@ LINKFLAGS=/subsystem:windows\
 /libpath:deps\x86.winnt.msvc10\python\
 /nodefaultlib:"libcd"\
 /nodefaultlib:"libcmt"\
-/incremental:NO\
 /machine:X86
 
 SYSDEPS=\
