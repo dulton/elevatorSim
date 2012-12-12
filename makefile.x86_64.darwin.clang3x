@@ -41,7 +41,7 @@ PY_CXXFLAGS=$(shell python3.3-config --includes)
 FLTK_CXXFLAGS=-I$(shell fltk-config --includedir)
 BOOST_CXXFLAGS=-I$(BOOST_INSTALL_DIR)/include/boost
 
-CXXFLAGS=-c -std=c++11 -DBOOST_DATE_TIME_NO_LOCALE -D_ES_DARWIN\
+CXXFLAGS=-c -std=c++11 -stdlib=libc++ -DBOOST_DATE_TIME_NO_LOCALE -D_ES_DARWIN\
 $(WARN_CXXFLAGS) $(PY_CXXFLAGS) $(FLTK_CXXFLAGS)
 
 FRAMEWORKS_LDFLAGS=-framework AppKit -framework Quartz -framework OpenGL -framework GLUT -framework AGL
