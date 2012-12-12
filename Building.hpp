@@ -37,7 +37,6 @@
 #include "Elevator.hpp"
 #include "ISimulationTerminal.hpp"
 
-#include <GL/glut.h>
 #include <set>
 #include <vector>
 
