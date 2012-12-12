@@ -4,4 +4,15 @@
 *.asm
 *.pdb
 *.pyc
+*.log
+*.exe
+*.ilk
+*.user
+*.opensdf
+*.map
+*.res
+*.idb
+*.sdf
+*.suo
+.firstrun
 __pycache__
