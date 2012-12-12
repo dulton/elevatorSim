@@ -121,7 +121,7 @@ public:
    };
 
    inline bool isFull() const {
-      return (maxOccupants <= numPeopleContained()?true:false);
+      return (numPeopleContained() >= maxOccupants);
    }
 
    /* fancy animation turn on function */
