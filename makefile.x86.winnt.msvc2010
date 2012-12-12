@@ -48,6 +48,7 @@ LINKFLAGS=/subsystem:windows\
 /libpath:deps\x86.winnt.msvc10\python\
 /nodefaultlib:"libcd"\
 /nodefaultlib:"libcmt"\
+/dynamicbase\
 /machine:X86
 
 SYSDEPS=\
