@@ -45,7 +45,7 @@ struct ElevatorFixture {
    ~ElevatorFixture();
 };
 
-elevatorSim::Elevator* ElevatorFixture::testElevator = NULL;
+Elevator* ElevatorFixture::testElevator = NULL;
 
 ElevatorFixture::ElevatorFixture() {
    testElevator = new Elevator(0);
