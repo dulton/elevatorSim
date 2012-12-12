@@ -28,7 +28,7 @@ SimulationState.obj
 
 UNIT_TEST_OBJS=\
 UnitTests.obj\
-ElevatorUnitTests.obj
+BuildingIntegrationTests.obj
 
 OBJS=$(CLIENT_OBJ) $(SIM_OBJS)
 

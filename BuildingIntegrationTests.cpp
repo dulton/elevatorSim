@@ -38,18 +38,40 @@
 
 using namespace elevatorSim;
 
+struct BuildingFixture {
+
+   static Building* testBuilding;
+   static const int testStoryCount = 10;
+   static const int testElevCount = 1;
+
+   BuildingFixture();
+   ~BuildingFixture();
+};
+
+Building* BuildingFixture::testBuilding = NULL;
+
+BuildingFixture::BuildingFixture() {
+   testBuilding = new Building(testStoryCount, testElevCount);
+}
+
+BuildingFixture::~BuildingFixture() {
+   delete testBuilding;
+}
+
 BOOST_AUTO_TEST_SUITE( elevator_tests )
 
-BOOST_AUTO_TEST_CASE( elevator_initialization_test ) {
-   const int testStoryCount = 10;
-   const int testElevCount = 1;
+BOOST_FIXTURE_TEST_CASE( building_initialization_test, BuildingFixture ) {
+   BOOST_REQUIRE_EQUAL(
+      BuildingFixture::testBuilding->getStories(),
+      BuildingFixture::testStoryCount );
 
-   Building testBuilding(testStoryCount, testElevCount);
+   BOOST_REQUIRE_EQUAL(
+      BuildingFixture::testBuilding->getMaxElev(),
+      BuildingFixture::testElevCount );
+}
 
-   BOOST_REQUIRE_EQUAL( testBuilding.getStories(), testStoryCount );
-   BOOST_REQUIRE_EQUAL( testBuilding.getMaxElev(), testElevCount );
-
-   /* TODO: write more elevator specific tests */
+BOOST_FIXTURE_TEST_CASE( building_another_test, BuildingFixture ) {
+   BOOST_REQUIRE_EQUAL(1, 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
