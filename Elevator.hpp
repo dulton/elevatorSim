@@ -60,6 +60,9 @@ class Elevator :
    /* friends */
    friend class Building;
 
+   /* unit test friends */
+   friend struct ElevatorFixture;
+
    /* private static constants */
 
    /* private static methods */

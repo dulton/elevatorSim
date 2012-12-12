@@ -36,7 +36,7 @@
 #include <boost/test/detail/unit_test_parameters.hpp>
 #include <fstream>
 
-using namespace elevatorSim;
+namespace elevatorSim {
 
 struct BuildingFixture {
 
@@ -58,20 +58,25 @@ BuildingFixture::~BuildingFixture() {
    delete testBuilding;
 }
 
-BOOST_AUTO_TEST_SUITE( elevator_tests )
+} /* namespace elevatorSim */
 
-BOOST_FIXTURE_TEST_CASE( building_initialization_test, BuildingFixture ) {
-   BOOST_REQUIRE_EQUAL(
-      BuildingFixture::testBuilding->getStories(),
-      BuildingFixture::testStoryCount );
+BOOST_AUTO_TEST_SUITE( building_integration_tests )
 
-   BOOST_REQUIRE_EQUAL(
-      BuildingFixture::testBuilding->getMaxElev(),
-      BuildingFixture::testElevCount );
+BOOST_FIXTURE_TEST_CASE( 
+   building_initialization_test, 
+   elevatorSim::BuildingFixture ) {
+      BOOST_REQUIRE_EQUAL(
+         BuildingFixture::testBuilding->getStories(),
+         BuildingFixture::testStoryCount );
+
+      BOOST_REQUIRE_EQUAL(
+         BuildingFixture::testBuilding->getMaxElev(),
+         BuildingFixture::testElevCount );
 }
 
-BOOST_FIXTURE_TEST_CASE( building_another_test, BuildingFixture ) {
-   BOOST_REQUIRE_EQUAL(1, 1);
+BOOST_FIXTURE_TEST_CASE( 
+   building_another_test, elevatorSim::BuildingFixture ) {
+    BOOST_REQUIRE_EQUAL(1, 1); /* TODO: stub */
 }
 
 BOOST_AUTO_TEST_SUITE_END()

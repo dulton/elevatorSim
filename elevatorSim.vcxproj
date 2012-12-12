@@ -50,6 +50,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
+    <ClCompile Include="BuildingIntegrationTests.cpp" />
     <ClCompile Include="cCameraManager.cpp" />
     <ClCompile Include="cKeyManager.cpp" />
     <ClCompile Include="cRenderObjs.cpp" />
