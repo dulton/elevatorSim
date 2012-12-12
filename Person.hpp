@@ -50,6 +50,9 @@ class Person : public ISimulationTerminal {
    friend class Floor;
    friend class Elevator;
 
+   /* unit test friends */
+   friend struct PersonFixture;
+
    /* private static constants */
    enum PRIORITY {
       UNKNOWN,
