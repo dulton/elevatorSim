@@ -51,13 +51,19 @@ namespace elevatorSim   {
 SimulationState* SimulationState::simulationState = NULL;
 
 void SimulationState::saveEntranceUnsafe( const int numPeople ) {
-   entrancesAndExits.push_back(
-      std::pair<int,int> (logicTicks, numPeople));
+   if(entrancesAndExits.find(logicTicks) == entrancesAndExits.end() ) {
+      entrancesAndExits[logicTicks] = numPeople;
+   } else {
+      entrancesAndExits[logicTicks] += numPeople;
+   }
 }
 
 void SimulationState::saveExitUnsafe( const int numPeople) {
-   entrancesAndExits.push_back(
-      std::pair<int,int> (logicTicks, -numPeople));
+   if(entrancesAndExits.find(logicTicks) == entrancesAndExits.end() ) {
+      entrancesAndExits[logicTicks] = -numPeople;
+   } else {
+      entrancesAndExits[logicTicks] -= numPeople;
+   }
 }
 
 

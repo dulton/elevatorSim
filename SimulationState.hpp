@@ -41,7 +41,7 @@
 
 #include <cassert>
 #include <set>
-#include <list>
+#include <map>
 #include <boost/thread/mutex.hpp>
 
 namespace elevatorSim {
@@ -141,7 +141,7 @@ public:
       return logicTicks;
    }
 
-   const std::list<std::pair<int, int>>&
+   const std::map<int, int>&
       getEntrancesAndExitsReadOnly() const {
          return entrancesAndExits;
    }
@@ -156,7 +156,7 @@ private:
    static SimulationState* simulationState;
 
    std::set<IStateObject*> stateObjects;
-   std::list<std::pair<int, int>> entrancesAndExits;
+   std::map<int, int> entrancesAndExits;
    boost::mutex bigAssStateMutex;
 
    StateKind cState;

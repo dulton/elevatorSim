@@ -83,8 +83,9 @@ void Person::update() {
    */
 
    IPersonCarrier* container = locateContainer();
-   std::vector<Elevator*> elevators = SimulationState::acquire().getBuilding().getElevators();
-   std::vector<Floor*> floors = SimulationState::acquire().getBuilding().getFloors();
+   SimulationState &simState = SimulationState::acquire();
+   std::vector<Elevator*> elevators = simState.getBuilding().getElevators();
+   std::vector<Floor*> floors = simState.getBuilding().getFloors();
 
    /* we're waiting at floor, so check if there are any elevators currently on this floor,
    * check to see if an elevator has arrived, and get on if it has
@@ -112,6 +113,9 @@ void Person::update() {
          /* remove ourselves from our containing elevator */
          assert( elevatorContainer -> removePerson( this ) );
          elevatorContainer->peopleGetOffAnimationOn();
+
+         /* for statistics tracking */
+         simState.saveExitUnsafe(1);
 
          if(isDebugBuild()) {
             std::stringstream dbgSS;
@@ -148,6 +152,9 @@ void Person::update() {
          /* move ourselves to this elevator */
          elevatorToBoard -> addPerson( this );
          elevatorToBoard->peopleGetOnAnimationOn();
+
+         /* for statistics tracking */
+         simState.saveEntranceUnsafe(1);
 
          /* remove ourselves from our containing floor */
          assert( floorContainer -> removePerson( this ) );
