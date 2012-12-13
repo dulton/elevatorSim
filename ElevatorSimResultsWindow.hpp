@@ -52,7 +52,10 @@ public:
    const static int WINDOW_WIDTH;
    const static int WINDOW_HEIGHT;
    const static char WINDOW_TITLE[];
-   const static int CHART_BORDER;
+   const static int CHART_BORDER_WIDTH;
+   const static int CHART_BORDER_HEIGHT;
+
+   const static char CHART_TITLE[];
 
    ElevatorSimResultsWindow();
    ~ElevatorSimResultsWindow();

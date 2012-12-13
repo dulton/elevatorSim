@@ -50,17 +50,27 @@ namespace elevatorSim {
 const char ElevatorSimResultsWindow::WINDOW_TITLE[] = "Simulation Report";
 const int ElevatorSimResultsWindow::WINDOW_WIDTH = 512;
 const int ElevatorSimResultsWindow::WINDOW_HEIGHT = 316;
-const int ElevatorSimResultsWindow::CHART_BORDER = 10;
+const int ElevatorSimResultsWindow::CHART_BORDER_WIDTH = 10;
+const int ElevatorSimResultsWindow::CHART_BORDER_HEIGHT = 25;
+const char ElevatorSimResultsWindow::CHART_TITLE[] =
+   "Entrances and Exits over time";
 
 /* public methods */
 ElevatorSimResultsWindow::ElevatorSimResultsWindow() :
             Fl_Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE) {
 
    resultsChart = new Fl_Chart(
-      CHART_BORDER,
-      CHART_BORDER,
-      WINDOW_WIDTH - 2 * CHART_BORDER,
-      WINDOW_HEIGHT - 2 * CHART_BORDER );
+      CHART_BORDER_WIDTH,
+      CHART_BORDER_HEIGHT,
+      WINDOW_WIDTH - 2 * CHART_BORDER_WIDTH,
+      WINDOW_HEIGHT - 2 * CHART_BORDER_HEIGHT,
+      CHART_TITLE);
+
+   resultsChart->type(FL_SPIKE_CHART);
+
+   resultsChart->insert(1, -10.0, 0, FL_GREEN );
+   resultsChart->insert(2, 15.0, 0, FL_RED );
+   resultsChart->autosize(1);
 
    resizable(*resultsChart);
    end();
