@@ -45,13 +45,7 @@ class Building;
 class Elevator;
 
 class Person : public ISimulationTerminal {
-   /* friends */
-   friend class Building;
-   friend class Floor;
-   friend class Elevator;
-
-   /* unit test friends */
-   friend struct PersonFixture;
+public:
 
    /* private static constants */
    enum PRIORITY {
@@ -60,6 +54,16 @@ class Person : public ISimulationTerminal {
       HIGH,
       EMERGENCY
    };
+
+private:
+
+   /* friends */
+   friend class Building;
+   friend class Floor;
+   friend class Elevator;
+
+   /* unit test friends */
+   friend struct PersonFixture;
 
    /* private static methods */
 

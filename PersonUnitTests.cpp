@@ -70,6 +70,16 @@ BOOST_FIXTURE_TEST_CASE(
    elevatorSim::PersonFixture ) {
 
       BOOST_CHECK( testPerson != NULL );
+
+      PersonFixture::testPerson->init();
+
+      BOOST_REQUIRE_EQUAL( 
+         PersonFixture::testPerson -> getPriority(),
+         elevatorSim::Person::UNKNOWN);
+
+      BOOST_REQUIRE_EQUAL( 
+         testPerson -> getDestinationYVal(),
+         PersonFixture::testPersonStartYVal);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
