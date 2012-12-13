@@ -40,6 +40,8 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_File_Chooser.H>
 #include <Fl/Fl_Chart.H>
+#include <FL/Enumerations.H>
+#include <FL/names.h>
 
 #include <boost/lexical_cast.hpp>
 #include <fstream>
@@ -56,9 +58,59 @@ const char ElevatorSimResultsWindow::CHART_TITLE[] =
    "Entrances and Exits over time";
 
 /* public methods */
+void ElevatorSimResultsWindow::updateChartData() {
+   if(visible()) {
+      LOG_ERROR(
+         Logger::SUB_FLTK,
+         "BUG: attempted to update chart data while results window was visible");
+      return;
+   }
+
+   /* clear the chart data */
+   resultsChart->clear();
+
+   /* acquire a reference to the simulate state and lock it */
+   SimulationState& simState = SimulationState::acquire();
+   simState.lockBASM();
+
+   /* acquire a pointer to the statistics map */
+   const std::map<int, int>& entrancesAndExits =
+      SimulationState::acquire().getEntrancesAndExitsReadOnly();
+
+   /* instantiate a range variable */
+   int lastEvent = 0;
+   int currentPos = 0;
+   for( std::map<int, int>::const_iterator ii
+      = entrancesAndExits.begin(); ii != entrancesAndExits.end();
+      ++ii) {
+
+         /* retrieve values from the iterator and maybe update range variable */
+         int currentIndex = ii->first;
+         double currentValue = (double) ii->second;
+         lastEvent = currentIndex > lastEvent ? currentIndex : lastEvent;
+
+         /* insert the data into the new chart */
+         resultsChart->insert(
+            currentPos,
+            currentValue,
+            0,
+            (currentValue < 0) ? ( FL_RED ) : ( FL_GREEN ));
+
+         ++currentPos;
+   }
+
+   /* set the bounds */
+   /* TODO: retrieve this somewhere safer */
+   resultsChart->bounds( -12.0, 12.0 );
+   resultsChart->autosize(1);
+
+   simState.unlockBASM();
+}
+
 ElevatorSimResultsWindow::ElevatorSimResultsWindow() :
             Fl_Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE) {
 
+   /* instantiate the chart */
    resultsChart = new Fl_Chart(
       CHART_BORDER_WIDTH,
       CHART_BORDER_HEIGHT,
@@ -66,22 +118,19 @@ ElevatorSimResultsWindow::ElevatorSimResultsWindow() :
       WINDOW_HEIGHT - 2 * CHART_BORDER_HEIGHT,
       CHART_TITLE);
 
+   /* set the right type */
    resultsChart->type(FL_SPIKE_CHART);
 
-
-
-   /* TODO: loop over SimulationState.getEntrancesExits... */
-
-   resultsChart->autosize(1);
-
+   /* add it to the parent frame */
    resizable(*resultsChart);
+
    end();
 }
 
 int ElevatorSimResultsWindow::handle(int event) {
    if(isDebugBuild()) {
       std::stringstream dbgSS;
-      dbgSS << event << std::endl;
+      dbgSS <<  fl_eventnames[event]  << std::endl;
       LOG_INFO( Logger::SUB_FLTK, sstreamToBuffer(dbgSS) );
    }
 

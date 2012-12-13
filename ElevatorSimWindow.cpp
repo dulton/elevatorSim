@@ -233,6 +233,7 @@ void ElevatorSimWindow::stopSimCB(Fl_Widget* w, void* userData) {
       }
 
       SimulationState::acquire().stop();
+      thisWin -> resultsWin -> updateChartData();
       thisWin -> resultsWin -> show();
    }
 }

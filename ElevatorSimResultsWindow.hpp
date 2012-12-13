@@ -58,6 +58,7 @@ public:
 
    const static char CHART_TITLE[];
 
+   void updateChartData();
    ElevatorSimResultsWindow();
    ~ElevatorSimResultsWindow();
 };
