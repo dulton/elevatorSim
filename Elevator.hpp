@@ -60,6 +60,9 @@ class Elevator :
    /* friends */
    friend class Building;
 
+   /* unit test friends */
+   friend struct ElevatorFixture;
+
    /* private static constants */
 
    /* private static methods */
@@ -121,7 +124,7 @@ public:
    };
 
    inline bool isFull() const {
-      return (maxOccupants <= numPeopleContained()?true:false);
+      return (numPeopleContained() >= maxOccupants);
    }
 
    /* fancy animation turn on function */

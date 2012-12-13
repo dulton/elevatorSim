@@ -29,7 +29,7 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-#include "Elevator.hpp"
+#include "Floor.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/detail/unit_test_parameters.hpp>
@@ -37,35 +37,33 @@
 
 namespace elevatorSim {
 
-struct ElevatorFixture {
+struct FloorFixture {
 
-   static Elevator* testElevator;
+   static Floor* testFloor;
 
-   ElevatorFixture();
-   ~ElevatorFixture();
+   FloorFixture();
+   ~FloorFixture();
 };
 
-Elevator* ElevatorFixture::testElevator = NULL;
+Floor* FloorFixture::testFloor = NULL;
 
-ElevatorFixture::ElevatorFixture() {
-   testElevator = new Elevator(0);
+FloorFixture::FloorFixture() {
+   testFloor = new Floor(0, 0, 1.0f);
 }
 
-ElevatorFixture::~ElevatorFixture() {
-   delete testElevator;
+FloorFixture::~FloorFixture() {
+   delete testFloor;
 }
 
 } /* namespace elevatorSim */
 
 
-BOOST_AUTO_TEST_SUITE( elevator_unit_tests )
+BOOST_AUTO_TEST_SUITE( floor_unit_tests )
 
 BOOST_FIXTURE_TEST_CASE( 
-   elevator_initialization_test, 
-   elevatorSim::ElevatorFixture ) {
-      BOOST_REQUIRE_EQUAL(
-         ElevatorFixture::testElevator->getCurrentFloor(),
-         0 );
+   floor_initialization_test, 
+   elevatorSim::FloorFixture ) {
+      BOOST_CHECK( testFloor != NULL );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

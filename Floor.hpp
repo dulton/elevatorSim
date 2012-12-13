@@ -55,6 +55,9 @@ class Floor :
    /* friends */
    friend class Building;
 
+   /* unit test friends */
+   friend struct FloorFixture;
+
    /* private static constants */
 
    /* private static methods */

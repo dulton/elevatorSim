@@ -29,7 +29,7 @@
  * policies, either expressed or implied, of the FreeBSD Project.
  */
 
-#include "Elevator.hpp"
+#include "Person.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/detail/unit_test_parameters.hpp>
@@ -37,35 +37,39 @@
 
 namespace elevatorSim {
 
-struct ElevatorFixture {
+struct PersonFixture {
 
-   static Elevator* testElevator;
+   static const int testPersonStartYVal = 0;
+   static const int testPersonDestYVal = 0;
 
-   ElevatorFixture();
-   ~ElevatorFixture();
+   static Person* testPerson;
+
+   PersonFixture();
+   ~PersonFixture();
 };
 
-Elevator* ElevatorFixture::testElevator = NULL;
+Person* PersonFixture::testPerson = NULL;
 
-ElevatorFixture::ElevatorFixture() {
-   testElevator = new Elevator(0);
+PersonFixture::PersonFixture() {
+   testPerson = new Person(
+      testPersonStartYVal, 
+      testPersonDestYVal );
 }
 
-ElevatorFixture::~ElevatorFixture() {
-   delete testElevator;
+PersonFixture::~PersonFixture() {
+   delete testPerson;
 }
 
 } /* namespace elevatorSim */
 
 
-BOOST_AUTO_TEST_SUITE( elevator_unit_tests )
+BOOST_AUTO_TEST_SUITE( person_unit_tests )
 
 BOOST_FIXTURE_TEST_CASE( 
-   elevator_initialization_test, 
-   elevatorSim::ElevatorFixture ) {
-      BOOST_REQUIRE_EQUAL(
-         ElevatorFixture::testElevator->getCurrentFloor(),
-         0 );
+   person_initialization_test, 
+   elevatorSim::PersonFixture ) {
+
+      BOOST_CHECK( testPerson != NULL );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
