@@ -41,14 +41,16 @@ namespace elevatorSim {
 struct BuildingFixture {
 
    static Building* testBuilding;
-   static const int testStoryCount = 10;
-   static const int testElevCount = 1;
+   static const int testStoryCount;
+   static const int testElevCount;
 
    BuildingFixture();
    ~BuildingFixture();
 };
 
 Building* BuildingFixture::testBuilding = NULL;
+const int BuildingFixture::testStoryCount = 10;
+const int BuildingFixture::testElevCount = 1;
 
 BuildingFixture::BuildingFixture() {
    testBuilding = new Building(testStoryCount, testElevCount);
@@ -66,12 +68,12 @@ BOOST_FIXTURE_TEST_CASE(
    building_initialization_test, 
    elevatorSim::BuildingFixture ) {
       BOOST_REQUIRE_EQUAL(
-         BuildingFixture::testBuilding->getStories(),
-         BuildingFixture::testStoryCount );
+         testBuilding->getStories(),
+         testStoryCount );
 
       BOOST_REQUIRE_EQUAL(
-         BuildingFixture::testBuilding->getMaxElev(),
-         BuildingFixture::testElevCount );
+         testBuilding->getMaxElev(),
+         testElevCount );
 }
 
 BOOST_FIXTURE_TEST_CASE( 
