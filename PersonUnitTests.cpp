@@ -39,8 +39,8 @@ namespace elevatorSim {
 
 struct PersonFixture {
 
-   static const int testPersonStartYVal = 0;
-   static const int testPersonDestYVal = 0;
+   static const int testPersonStartYVal;
+   static const int testPersonDestYVal;
 
    static Person* testPerson;
 
@@ -48,6 +48,8 @@ struct PersonFixture {
    ~PersonFixture();
 };
 
+const int PersonFixture::testPersonStartYVal = 0;
+const int PersonFixture::testPersonDestYVal = 0;
 Person* PersonFixture::testPerson = NULL;
 
 PersonFixture::PersonFixture() {
