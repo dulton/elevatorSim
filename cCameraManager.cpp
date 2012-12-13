@@ -37,7 +37,6 @@
 #include "Logger.hpp"
 
 #include <FL/Enumerations.H>
-#include <GL/glut.h>
 #include <sstream>
 
 namespace elevatorSim {

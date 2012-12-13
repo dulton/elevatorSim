@@ -40,7 +40,6 @@
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Gl_Window.H>
 #include <FL/names.h>
-#include <GL/glut.h>
 
 #include <ctime>
 #include <sstream>

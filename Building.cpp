@@ -36,7 +36,6 @@
 #include "cRenderObjs.hpp"
 #include "Logger.hpp"
 
-#include <GL/glut.h>
 #include <iostream>
 #include <set>
 #include <sstream>

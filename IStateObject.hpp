@@ -32,6 +32,8 @@
 #ifndef _I_STATE_OBJECT_H
 #define _I_STATE_OBJECT_H
 
+#include "ElevatorSim.hpp"
+
 namespace elevatorSim {
 
 struct IStateObject {
