@@ -41,6 +41,7 @@
 
 #include <cassert>
 #include <set>
+#include <list>
 #include <boost/thread/mutex.hpp>
 
 namespace elevatorSim {
@@ -140,6 +141,14 @@ public:
       return logicTicks;
    }
 
+   const std::list<std::pair<int, int>>&
+      getEntrancesAndExitsReadOnly() const {
+         return entrancesAndExits;
+   }
+
+   void saveEntranceUnsafe( const int numPeople );
+   void saveExitUnsafe( const int numPeople);
+
 private:
    SimulationState();
    ~SimulationState();
@@ -147,6 +156,7 @@ private:
    static SimulationState* simulationState;
 
    std::set<IStateObject*> stateObjects;
+   std::list<std::pair<int, int>> entrancesAndExits;
    boost::mutex bigAssStateMutex;
 
    StateKind cState;
@@ -163,7 +173,6 @@ private:
    void decrefSimStateTuple(PyObject* simStateTuple);
 
    bool loadPythonScript( const std::string& pyAiPath );
-   
 
    Building* building;
    PyObject* userScriptCodeObject;

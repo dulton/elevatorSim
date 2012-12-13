@@ -50,6 +50,17 @@ namespace elevatorSim   {
 
 SimulationState* SimulationState::simulationState = NULL;
 
+void SimulationState::saveEntranceUnsafe( const int numPeople ) {
+   entrancesAndExits.push_back(
+      std::pair<int,int> (logicTicks, numPeople));
+}
+
+void SimulationState::saveExitUnsafe( const int numPeople) {
+   entrancesAndExits.push_back(
+      std::pair<int,int> (logicTicks, -numPeople));
+}
+
+
 SimulationState::SimulationState() : cState(SimulationState::SIMULATION_STARTING) {
    stateObjects.insert((timeManager = new cTimeManager()));
    stateObjects.insert((keyManager = new cKeyManager()));
@@ -150,6 +161,7 @@ void SimulationState::start(
          timeManager->init();
          keyManager->init();
          cameraManager->init();
+         entrancesAndExits.clear();
 
          stateObjects.erase(building);
          delete building;
