@@ -354,13 +354,23 @@ void ElevatorSimWindow::buildDialogs() {
    helpTextBuffer = new Fl_Text_Buffer();
    helpTextDisplay = new Fl_Text_Display(10, 30, 423, 213, "How to use:");
 
+   helpTextDisplay->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS,  0);
    helpTextDisplay->buffer(helpTextBuffer);
    helpTextDisplay->insert(
       "Camera controls: \n"
-      " WASD -\n   re-orient the view vector\n"
-      " RF -\n   rotate the up vector\n"
-      " Page Up/Page Down -\n   move camera along the y axis\n\n"
-      " Space -\n   resets camera\n\n"
+      "     WASD -\n"
+      "          re-orient the view vector\n"
+      "     Up and Down Arrow Keys -\n"
+      "          move camera position along the z axis\n"
+      "     Left and Right Arrow Keys -\n"
+      "          move camera position along the x axis\n"
+      "     RF -\n"
+      "          rotate the up vector\n"
+      "     Page Up/Page Down -\n"
+      "          move camera along the y axis\n"
+      "     Space -\n"
+      "          resets camera\n\n"
+      " NOTE: you must Begin a simulation before you can use these\n\n"
       " see https://github.com/maxdeliso/elevatorSim/wiki for more"
    );
 
@@ -388,6 +398,7 @@ void ElevatorSimWindow::buildDialogs() {
    aboutTextDisplay = new Fl_Text_Display(10,30,380,200);
    aboutDoneButton = new Fl_Button(150, 250, 100, 40, "OK");
 
+   aboutTextDisplay->wrap_mode(Fl_Text_Display::WRAP_AT_BOUNDS,  0);
    aboutTextDisplay->buffer(aboutTextBuffer);
    aboutDoneButton->callback((Fl_Callback*) dismissAboutCB, this);
 
