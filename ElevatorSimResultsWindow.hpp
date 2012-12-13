@@ -36,6 +36,7 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
+#include <Fl/Fl_Chart.H>
 
 namespace elevatorSim {
 class ElevatorSimResultsWindow : public Fl_Window {
@@ -43,12 +44,15 @@ class ElevatorSimResultsWindow : public Fl_Window {
 
    /* user input widgets */
 
+   Fl_Chart* resultsChart;
+
 public:
 
    /* public static members */
    const static int WINDOW_WIDTH;
    const static int WINDOW_HEIGHT;
    const static char WINDOW_TITLE[];
+   const static int CHART_BORDER;
 
    ElevatorSimResultsWindow();
    ~ElevatorSimResultsWindow();

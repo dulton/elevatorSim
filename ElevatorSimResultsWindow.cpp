@@ -39,6 +39,7 @@
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_File_Chooser.H>
+#include <Fl/Fl_Chart.H>
 
 #include <boost/lexical_cast.hpp>
 #include <fstream>
@@ -49,14 +50,25 @@ namespace elevatorSim {
 const char ElevatorSimResultsWindow::WINDOW_TITLE[] = "Simulation Report";
 const int ElevatorSimResultsWindow::WINDOW_WIDTH = 512;
 const int ElevatorSimResultsWindow::WINDOW_HEIGHT = 316;
+const int ElevatorSimResultsWindow::CHART_BORDER = 10;
 
 /* public methods */
 ElevatorSimResultsWindow::ElevatorSimResultsWindow() :
             Fl_Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE) {
 
+   resultsChart = new Fl_Chart(
+      CHART_BORDER,
+      CHART_BORDER,
+      WINDOW_WIDTH - 2 * CHART_BORDER,
+      WINDOW_HEIGHT - 2 * CHART_BORDER );
+
+   resizable(*resultsChart);
+   end();
 }
 
 ElevatorSimResultsWindow::~ElevatorSimResultsWindow() {
+
+   delete resultsChart;
    if(isDebugBuild()) {
       std::stringstream dbgSS;
       dbgSS << "finished destroying results window @ " << this << std::endl;
