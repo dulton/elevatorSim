@@ -94,7 +94,7 @@ class ElevatorSimWindow : public Fl_Window {
 
    /* help widgets */
    Fl_Window* helpWin;
-   Fl_Text_Display* helpLabel;
+   Fl_Text_Display* helpTextDisplay;
    Fl_Button* helpDoneButton;
 
    /*About widgets*/

@@ -352,12 +352,12 @@ void ElevatorSimWindow::buildDialogs() {
    /* Help Dialog */
    helpWin = new Fl_Window(300, 300, "Help");
 
-   helpLabel = new Fl_Text_Display(10,30,280,190,"How to use:");
+   helpTextDisplay = new Fl_Text_Display(10,30,280,190,"How to use:");
    helpDoneButton = new Fl_Button(100, 240, 100, 40, "Done");
 
    helpDoneButton->callback((Fl_Callback*) dismissHelpCB, this);
 
-   helpWin->add(helpLabel);
+   helpWin->add(helpTextDisplay);
    helpWin->add(helpDoneButton);
    helpWin->end();
 
@@ -555,7 +555,7 @@ ElevatorSimWindow::~ElevatorSimWindow() {
    delete aboutWin;
 
    delete helpDoneButton;
-   delete helpLabel;
+   delete helpTextDisplay;
    delete helpWin;
 
    delete noButton;
