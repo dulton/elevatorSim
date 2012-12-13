@@ -350,19 +350,28 @@ void ElevatorSimWindow::buildButtons() {
 
 void ElevatorSimWindow::buildDialogs() {
    /* Help Dialog */
-   helpWin = new Fl_Window(300, 300, "Help");
+   helpWin = new Fl_Window(443, 273, "Help");
+   helpTextBuffer = new Fl_Text_Buffer();
+   helpTextDisplay = new Fl_Text_Display(10, 30, 423, 213, "How to use:");
 
-   helpTextDisplay = new Fl_Text_Display(10,30,280,190,"How to use:");
-   helpDoneButton = new Fl_Button(100, 240, 100, 40, "Done");
+   helpTextDisplay->buffer(helpTextBuffer);
+   helpTextDisplay->insert(
+      "Camera controls: \n"
+      " WASD -\n   re-orient the view vector\n"
+      " RF -\n   rotate the up vector\n"
+      " Page Up/Page Down -\n   move camera along the y axis\n\n"
+      " Space -\n   resets camera\n\n"
+      " see https://github.com/maxdeliso/elevatorSim/wiki for more"
+   );
 
-   helpDoneButton->callback((Fl_Callback*) dismissHelpCB, this);
+   helpTextBuffer->add_predelete_callback( nullaryTextPredeleteCB, this);
+   helpTextBuffer->add_modify_callback( nullaryTextModifyCB, this);
 
    helpWin->add(helpTextDisplay);
-   helpWin->add(helpDoneButton);
    helpWin->end();
 
    /* Confirmation dialog */
-   confirmDialog = new Fl_Window(220, 110, "Are you sure?");
+   confirmDialog = new Fl_Window(220, 110, "Exit elevatorSim?");
    yesButton = new Fl_Button(10, 10, 200, 40, "yes");
    noButton = new Fl_Button(10, 60, 200, 40, "no");
 
@@ -394,7 +403,7 @@ void ElevatorSimWindow::buildDialogs() {
    << FL_MINOR_VERSION << FL_PATCH_VERSION
    << " http://www.fltk.org" << std::endl
    << "    python v" << PY_MAJOR_VERSION << "_" << PY_MINOR_VERSION
-   << " http://www.python.org\n"
+   << " http://www.python.org\n\n"
    << "hosted at: https://github.com/maxdeliso/elevatorSim\n";
 
    do {
@@ -402,15 +411,12 @@ void ElevatorSimWindow::buildDialogs() {
       char lineBuffer[lineBufferLen];
 
       aboutSS.getline(lineBuffer, lineBufferLen);
-
-      if( strlen(lineBuffer) > 0 ) {
-         aboutTextBuffer->append(lineBuffer);
-         aboutTextBuffer->append("\n");
-      }
+      aboutTextBuffer->append(lineBuffer);
+      aboutTextBuffer->append("\n");
    } while( !aboutSS.eof() );
 
-   aboutTextBuffer->add_predelete_callback( aboutTextPredeleteCB, this);
-   aboutTextBuffer->add_modify_callback( aboutTextModifyCB, this);
+   aboutTextBuffer->add_predelete_callback(nullaryTextPredeleteCB, this);
+   aboutTextBuffer->add_modify_callback(nullaryTextModifyCB, this);
 
    aboutWin->add(aboutTextDisplay);
    aboutWin->add(aboutDoneButton);
@@ -452,7 +458,7 @@ void ElevatorSimWindow::updateButtonAvailability() {
    }
 }
 
-void ElevatorSimWindow::aboutTextPredeleteCB(
+void ElevatorSimWindow::nullaryTextPredeleteCB(
          int pos, int nDeleted, void* userData) {
 
    (void) pos;
@@ -460,7 +466,7 @@ void ElevatorSimWindow::aboutTextPredeleteCB(
    (void) userData;
 }
 
-void ElevatorSimWindow::aboutTextModifyCB(
+void ElevatorSimWindow::nullaryTextModifyCB(
          int pos, int nInserted, int nDeleted,
          int nRestyled, const char* deletedText,
          void* userData) {
@@ -554,8 +560,8 @@ ElevatorSimWindow::~ElevatorSimWindow() {
    delete aboutTextBuffer;
    delete aboutWin;
 
-   delete helpDoneButton;
    delete helpTextDisplay;
+   delete helpTextBuffer;
    delete helpWin;
 
    delete noButton;

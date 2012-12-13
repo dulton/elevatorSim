@@ -75,8 +75,8 @@ class ElevatorSimWindow : public Fl_Window {
    static void dismissHelpCB(Fl_Widget* w, void* userData);
    static void dismissAboutCB(Fl_Widget* w, void* userData);
 
-   static void aboutTextPredeleteCB( int pos, int nDeleted, void* cbArg);
-   static void aboutTextModifyCB(
+   static void nullaryTextPredeleteCB( int pos, int nDeleted, void* cbArg);
+   static void nullaryTextModifyCB(
             int pos, int nInserted, int nDeleted,
             int nRestyled, const char* deletedText,
             void* cbArg);
@@ -95,7 +95,7 @@ class ElevatorSimWindow : public Fl_Window {
    /* help widgets */
    Fl_Window* helpWin;
    Fl_Text_Display* helpTextDisplay;
-   Fl_Button* helpDoneButton;
+   Fl_Text_Buffer* helpTextBuffer;
 
    /*About widgets*/
    Fl_Window* aboutWin;
