@@ -376,10 +376,10 @@ void ElevatorSimWindow::buildDialogs() {
    /* About Dialog */
    aboutWin = new Fl_Window(400, 300, "About");
    aboutTextBuffer = new Fl_Text_Buffer();
-   aboutDisplay = new Fl_Text_Display(10,30,380,200);
+   aboutTextDisplay = new Fl_Text_Display(10,30,380,200);
    aboutDoneButton = new Fl_Button(150, 250, 100, 40, "OK");
 
-   aboutDisplay->buffer(aboutTextBuffer);
+   aboutTextDisplay->buffer(aboutTextBuffer);
    aboutDoneButton->callback((Fl_Callback*) dismissAboutCB, this);
 
    std::stringstream aboutSS;
@@ -412,7 +412,7 @@ void ElevatorSimWindow::buildDialogs() {
    aboutTextBuffer->add_predelete_callback( aboutTextPredeleteCB, this);
    aboutTextBuffer->add_modify_callback( aboutTextModifyCB, this);
 
-   aboutWin->add(aboutDisplay);
+   aboutWin->add(aboutTextDisplay);
    aboutWin->add(aboutDoneButton);
    aboutWin->end();
 }
@@ -550,7 +550,7 @@ ElevatorSimWindow::~ElevatorSimWindow() {
    delete startButton;
 
    delete aboutDoneButton;
-   delete aboutDisplay;
+   delete aboutTextDisplay;
    delete aboutTextBuffer;
    delete aboutWin;
 
