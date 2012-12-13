@@ -45,6 +45,7 @@ class ElevatorSimResultsWindow : public Fl_Window {
    /* user input widgets */
 
    Fl_Chart* resultsChart;
+   int handle(int event);
 
 public:
 

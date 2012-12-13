@@ -68,17 +68,29 @@ ElevatorSimResultsWindow::ElevatorSimResultsWindow() :
 
    resultsChart->type(FL_SPIKE_CHART);
 
-   resultsChart->insert(1, -10.0, 0, FL_GREEN );
-   resultsChart->insert(2, 15.0, 0, FL_RED );
+
+
+   /* TODO: loop over SimulationState.getEntrancesExits... */
+
    resultsChart->autosize(1);
 
    resizable(*resultsChart);
    end();
 }
 
-ElevatorSimResultsWindow::~ElevatorSimResultsWindow() {
+int ElevatorSimResultsWindow::handle(int event) {
+   if(isDebugBuild()) {
+      std::stringstream dbgSS;
+      dbgSS << event << std::endl;
+      LOG_INFO( Logger::SUB_FLTK, sstreamToBuffer(dbgSS) );
+   }
 
+   return Fl_Window::handle(event);
+}
+
+ElevatorSimResultsWindow::~ElevatorSimResultsWindow() {
    delete resultsChart;
+
    if(isDebugBuild()) {
       std::stringstream dbgSS;
       dbgSS << "finished destroying results window @ " << this << std::endl;
