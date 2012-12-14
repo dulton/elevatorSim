@@ -4,34 +4,38 @@
 ## os:       winnt
 ## compiler: msvc2010
 
-CLIENT_OBJ=ElevatorSim.obj
+OBJDIR=.\\
 
-SIM_OBJS=ElevatorSimWindow.obj\
-ElevatorSimRenderWindow.obj\
-ElevatorSimWelcomeWindow.obj\
-ElevatorSimStartWindow.obj\
-ElevatorSimResultsWindow.obj\
-cRenderObjs.obj\
-cTimeManager.obj\
-cKeyManager.obj\
-cCameraManager.obj\
-Elevator.obj\
-Location.obj\
-Person.obj\
-Building.obj\
-Floor.obj\
-ISimulationTerminal.obj\
-IStateObject.obj\
-IPersonCarrier.obj\
-Logger.obj\
-SimulationState.obj
+CLIENT_OBJ=\
+$(OBJDIR)ElevatorSim.obj
+
+SIM_OBJS=\
+$(OBJDIR)ElevatorSimWindow.obj\
+$(OBJDIR)ElevatorSimRenderWindow.obj\
+$(OBJDIR)ElevatorSimWelcomeWindow.obj\
+$(OBJDIR)ElevatorSimStartWindow.obj\
+$(OBJDIR)ElevatorSimResultsWindow.obj\
+$(OBJDIR)cRenderObjs.obj\
+$(OBJDIR)cTimeManager.obj\
+$(OBJDIR)cKeyManager.obj\
+$(OBJDIR)cCameraManager.obj\
+$(OBJDIR)Elevator.obj\
+$(OBJDIR)Location.obj\
+$(OBJDIR)Person.obj\
+$(OBJDIR)Building.obj\
+$(OBJDIR)Floor.obj\
+$(OBJDIR)ISimulationTerminal.obj\
+$(OBJDIR)IStateObject.obj\
+$(OBJDIR)IPersonCarrier.obj\
+$(OBJDIR)Logger.obj\
+$(OBJDIR)SimulationState.obj
 
 UNIT_TEST_OBJS=\
-UnitTests.obj\
-ElevatorUnitTests.obj\
-FloorUnitTests.obj\
-PersonUnitTests.obj\
-BuildingIntegrationTests.obj
+$(OBJDIR)UnitTests.obj\
+$(OBJDIR)ElevatorUnitTests.obj\
+$(OBJDIR)FloorUnitTests.obj\
+$(OBJDIR)PersonUnitTests.obj\
+$(OBJDIR)BuildingIntegrationTests.obj
 
 OBJS=$(CLIENT_OBJ) $(SIM_OBJS)
 
@@ -43,7 +47,7 @@ CXXFLAGS=/W4 /EHac /c /D_ES_WINNT /Iinc /Iinc\Python
 
 DEBUGFLAGS=/ZI /MDd
 
-RELEASEFLAGS=/0x /DNDEBUG
+RELEASEFLAGS=/Og /Ox /MD /DNDEBUG
 
 LINKFLAGS=/subsystem:windows\
 /libpath:deps\x86.winnt.msvc10\boost\
@@ -95,7 +99,9 @@ PDBFILE=elevatorSim.pdb
 RESFILE=elevatorSim.res
 RCFILE=elevatorSim.rc
 
-elevatorSim: $(OBJS) $(RESFILE) unitTests makefile.x86.winnt.msvc2010
+debug: $(OUT)
+
+$(OUT): $(OBJS) $(RESFILE) $(UNIT_TEST_OUT) makefile.x86.winnt.msvc2010
 	cl\
 $(OBJS)\
 $(DEBUGFLAGS)\
@@ -113,13 +119,13 @@ $(DEBUG_COOKEDDEPS)
 	$(UNIT_TEST_OUT)
 	@echo + success
 
-.cpp.obj:
-	cl $(DEBUGFLAGS) $(DRIVERFLAGS) $(CXXFLAGS) $< /FAcs /Fa$<.asm
+{./}.cpp{$(OBJDIR)}.obj:
+	cl $(DEBUGFLAGS) $(DRIVERFLAGS) $(CXXFLAGS) $<
 
 $(RESFILE): $(RCFILE)
    rc /nologo /v /r $(RCFILE)
    
-unitTests: $(UNIT_TEST_OBJS) $(SIM_OBJS)
+$(UNIT_TEST_OUT): $(UNIT_TEST_OBJS) $(SIM_OBJS)
 	cl\
 $(UNIT_TEST_OBJS)\
 $(SIM_OBJS)\
