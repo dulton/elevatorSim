@@ -172,7 +172,7 @@ $(RESFILE)
 	@echo + success
 
 {./}.cpp{$(DBG_OBJDIR)}.obj:
-	cl $(DRIVERFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $< /Fo$@
+	cl $(DRIVERFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $< /Fo$@ /FAscu /Fa$(DBG_OBJDIR)\$<.asm
 
 $(REL_OUT): $(REL_OBJS) $(RESFILE) $(REL_UNIT_TEST_OUT) makefile.x86.winnt.msvc2010
 	cl\
@@ -193,7 +193,7 @@ $(RESFILE)
 	@echo + success
 
 {./}.cpp{$(REL_OBJDIR)}.obj:
-	cl $(DRIVERFLAGS) $(CXXFLAGS) $(RELEASEFLAGS) $< /Fo$@
+	cl $(DRIVERFLAGS) $(CXXFLAGS) $(RELEASEFLAGS) $< /Fo$@ /FAscu /Fa$(REL_OBJDIR)\$<.asm
 
 $(RESFILE): $(RCFILE)
    rc /nologo /v /r $(RCFILE)
