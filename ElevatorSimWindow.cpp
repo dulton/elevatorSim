@@ -66,7 +66,6 @@ int ElevatorSimWindow::handle(int event) {
 
    if(event == FL_KEYDOWN) {
       if(lastKey == FL_Escape) {
-         confirmDialog->hotspot(15, 15);
          confirmDialog->show();
 
          return Fl_Window::handle(event);
@@ -85,7 +84,6 @@ int ElevatorSimWindow::handle(int event) {
       }
 
       if(welcomeWin->shouldShowTips()) {
-         welcomeWin->hotspot(15, 15);
          welcomeWin->show();
       }
 
@@ -107,7 +105,6 @@ void ElevatorSimWindow::windowCloseCB(Fl_Window* w, void* userData) {
    }
 
    ElevatorSimWindow* thisWin = (ElevatorSimWindow*) userData;
-   thisWin->confirmDialog->hotspot(15, 15);
    thisWin->confirmDialog->show();
 }
 
@@ -139,7 +136,6 @@ void ElevatorSimWindow::menuHelpCB(Fl_Widget* w, void* userData) {
    }
 
    ElevatorSimWindow* thisWindow = (ElevatorSimWindow*) userData;
-   thisWindow->helpWin->hotspot(15, 15);
    thisWindow->helpWin->show();
 }
 
@@ -181,7 +177,6 @@ void ElevatorSimWindow::startSimCB(Fl_Widget* w, void* userData) {
       }
 
       ElevatorSimWindow* thisWindow = (ElevatorSimWindow*) userData;
-      thisWindow->startWin->hotspot(15, 15);
       thisWindow->startWin->show();
    }
 }
@@ -260,7 +255,6 @@ void ElevatorSimWindow::menuQuitCB(Fl_Widget* w, void* userData) {
    }
 
    ElevatorSimWindow* thisWin = (ElevatorSimWindow*) userData;
-   thisWin->confirmDialog->hotspot(15, 15);
    thisWin->confirmDialog->show();
 }
 
@@ -274,7 +268,6 @@ void ElevatorSimWindow::menuAboutCB(Fl_Widget* w, void* userData) {
    }
 
    ElevatorSimWindow* thisWindow = (ElevatorSimWindow*) userData;
-   thisWindow->aboutWin->hotspot(15, 15);
    thisWindow->aboutWin->show();
 }
 
