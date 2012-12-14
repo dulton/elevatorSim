@@ -64,13 +64,13 @@ UNIT_TEST_OUT=elevatorSimUnitTests
 
 .PHONY: clean
 
-all: elevatorSim
+all: $(OUT)
 
-elevatorSim: $(OBJS) unitTests $(CLIENT_OBJ)
+$(OUT): $(OBJS) $(UNIT_TEST_OUT) $(CLIENT_OBJ)
 	@$(CXX) $(OBJS) $(CLIENT_OBJ) $(DBGFLAGS) $(LDFLAGS) -o $(OUT)
 	@./$(UNIT_TEST_OUT)
 
-unitTests: $(OBJS) $(UNIT_TEST_OBJS)
+$(UNIT_TEST_OUT): $(OBJS) $(UNIT_TEST_OBJS)
 	@$(CXX) $(OBJS) $(UNIT_TEST_OBJS) $(DBGFLAGS) $(LDFLAGS) -o $(UNIT_TEST_OUT)
 
 .cpp.o:
