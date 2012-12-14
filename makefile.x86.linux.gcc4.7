@@ -27,8 +27,12 @@ Logger.o
 
 CLIENT_OBJ=ElevatorSim.o
 
-UNIT_TEST_OBJS=UnitTests.o\
-ElevatorUnitTests.o
+UNIT_TEST_OBJS=\
+UnitTests.o\
+ElevatorUnitTests.o\
+FloorUnitTests.o\
+PersonUnitTests.o\
+BuildingIntegrationTests.o
 
 ## CXXFLAGS ##
 
@@ -38,7 +42,7 @@ CXXFLAGS=-c -std=c++11 -D_ES_UNIX $(WARN_CXXFLAGS) $(PY_CXXFLAGS)
 
 ## LDFLAGS ##
 
-PY_LDFLAGS=$(shell python3.3-config --ldflags) $(shell python3.3-config --libs)
+PY_LDFLAGS=$(shell python3.3-config --ldflags --libs)
 FLTK_LDFLAGS=$(shell fltk-config --use-gl --ldflags)
 GL_LDFLAGS=-lglut -lGL -lGLU
 BOOST_LDFLAGS=-lboost_system -lboost_chrono -lboost_thread -lboost_program_options
@@ -60,13 +64,13 @@ UNIT_TEST_OUT=elevatorSimUnitTests
 
 .PHONY: clean
 
-all: elevatorSim
+all: $(OUT)
 
-elevatorSim: $(OBJS) unitTests $(CLIENT_OBJ)
+$(OUT): $(OBJS) $(UNIT_TEST_OUT) $(CLIENT_OBJ)
 	@$(CXX) $(OBJS) $(CLIENT_OBJ) $(DBGFLAGS) $(LDFLAGS) -o $(OUT)
 	@./$(UNIT_TEST_OUT)
 
-unitTests: $(OBJS) $(UNIT_TEST_OBJS)
+$(UNIT_TEST_OUT): $(OBJS) $(UNIT_TEST_OBJS)
 	@$(CXX) $(OBJS) $(UNIT_TEST_OBJS) $(DBGFLAGS) $(LDFLAGS) -o $(UNIT_TEST_OUT)
 
 .cpp.o:

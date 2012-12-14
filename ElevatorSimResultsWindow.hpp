@@ -36,7 +36,7 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
-#include <Fl/Fl_Chart.H>
+#include <FL/Fl_Chart.H>
 
 namespace elevatorSim {
 class ElevatorSimResultsWindow : public Fl_Window {

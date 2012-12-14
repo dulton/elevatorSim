@@ -39,7 +39,7 @@
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_File_Chooser.H>
-#include <Fl/Fl_Chart.H>
+#include <FL/Fl_Chart.H>
 #include <FL/Enumerations.H>
 #include <FL/names.h>
 
