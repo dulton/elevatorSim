@@ -168,7 +168,7 @@ $(SYSDEPS)\
 $(RESFILE)
 	@echo + main binary build success
 	@echo + running unit tests
-	$(UNIT_TEST_OUT)
+	$(DBG_UNIT_TEST_OUT)
 	@echo + success
 
 {./}.cpp{$(DBG_OBJDIR)}.obj:
