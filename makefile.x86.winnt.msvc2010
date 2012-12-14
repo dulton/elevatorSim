@@ -123,8 +123,19 @@ DBG_COOKEDDEPS=\
 "libboost_system-vc100-mt-gd-1_52.lib"\
 "python33_d.lib"
 
-RELEASE_COOKEDDEPS=
-# TODO
+REL_COOKEDDEPS=\
+"fltk.lib"\
+"fltkforms.lib"\
+"fltkgl.lib"\
+"fltkimages.lib"\
+"fltkjpeg.lib"\
+"fltkpng.lib"\
+"fltkzlib.lib"\
+"libboost_program_options-vc100-mt-1_52.lib"\
+"libboost_thread-vc100-mt-1_52.lib"\
+"libboost_chrono-vc100-mt-1_52.lib"\
+"libboost_system-vc100-mt-1_52.lib"\
+"python33.lib"
 
 DBG_UNIT_TEST_OUT=elevatorSimTests_d.exe
 DBG_OUT=elevatorSim_d.exe
