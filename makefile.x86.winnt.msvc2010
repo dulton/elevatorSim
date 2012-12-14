@@ -4,40 +4,40 @@
 ## os:       winnt
 ## compiler: msvc2010
 
-OBJDIR=.\\
+DBG_OBJDIR=.\debug
 
-CLIENT_OBJ=\
-$(OBJDIR)ElevatorSim.obj
+DBG_CLIENT_OBJ=\
+$(DBG_OBJDIR)\ElevatorSim.obj
 
-SIM_OBJS=\
-$(OBJDIR)ElevatorSimWindow.obj\
-$(OBJDIR)ElevatorSimRenderWindow.obj\
-$(OBJDIR)ElevatorSimWelcomeWindow.obj\
-$(OBJDIR)ElevatorSimStartWindow.obj\
-$(OBJDIR)ElevatorSimResultsWindow.obj\
-$(OBJDIR)cRenderObjs.obj\
-$(OBJDIR)cTimeManager.obj\
-$(OBJDIR)cKeyManager.obj\
-$(OBJDIR)cCameraManager.obj\
-$(OBJDIR)Elevator.obj\
-$(OBJDIR)Location.obj\
-$(OBJDIR)Person.obj\
-$(OBJDIR)Building.obj\
-$(OBJDIR)Floor.obj\
-$(OBJDIR)ISimulationTerminal.obj\
-$(OBJDIR)IStateObject.obj\
-$(OBJDIR)IPersonCarrier.obj\
-$(OBJDIR)Logger.obj\
-$(OBJDIR)SimulationState.obj
+DBG_SIM_OBJS=\
+$(DBG_OBJDIR)\ElevatorSimWindow.obj\
+$(DBG_OBJDIR)\ElevatorSimRenderWindow.obj\
+$(DBG_OBJDIR)\ElevatorSimWelcomeWindow.obj\
+$(DBG_OBJDIR)\ElevatorSimStartWindow.obj\
+$(DBG_OBJDIR)\ElevatorSimResultsWindow.obj\
+$(DBG_OBJDIR)\cRenderObjs.obj\
+$(DBG_OBJDIR)\cTimeManager.obj\
+$(DBG_OBJDIR)\cKeyManager.obj\
+$(DBG_OBJDIR)\cCameraManager.obj\
+$(DBG_OBJDIR)\Elevator.obj\
+$(DBG_OBJDIR)\Location.obj\
+$(DBG_OBJDIR)\Person.obj\
+$(DBG_OBJDIR)\Building.obj\
+$(DBG_OBJDIR)\Floor.obj\
+$(DBG_OBJDIR)\ISimulationTerminal.obj\
+$(DBG_OBJDIR)\IStateObject.obj\
+$(DBG_OBJDIR)\IPersonCarrier.obj\
+$(DBG_OBJDIR)\Logger.obj\
+$(DBG_OBJDIR)\SimulationState.obj
 
-UNIT_TEST_OBJS=\
-$(OBJDIR)UnitTests.obj\
-$(OBJDIR)ElevatorUnitTests.obj\
-$(OBJDIR)FloorUnitTests.obj\
-$(OBJDIR)PersonUnitTests.obj\
-$(OBJDIR)BuildingIntegrationTests.obj
+DBG_UNIT_TEST_OBJS=\
+$(DBG_OBJDIR)\UnitTests.obj\
+$(DBG_OBJDIR)\ElevatorUnitTests.obj\
+$(DBG_OBJDIR)\FloorUnitTests.obj\
+$(DBG_OBJDIR)\PersonUnitTests.obj\
+$(DBG_OBJDIR)\BuildingIntegrationTests.obj
 
-OBJS=$(CLIENT_OBJ) $(SIM_OBJS)
+DBG_OBJS=$(DBG_CLIENT_OBJ) $(DBG_SIM_OBJS)
 
 DRIVERFLAGS=/errorreport:none /nologo
 
@@ -75,7 +75,7 @@ SYSDEPS=\
 "glu32.lib"\
 "opengl32.lib"
 
-DEBUG_COOKEDDEPS=\
+DBG_COOKEDDEPS=\
 "fltkd.lib"\
 "fltkformsd.lib"\
 "fltkgld.lib"\
@@ -92,52 +92,53 @@ DEBUG_COOKEDDEPS=\
 RELEASE_COOKEDDEPS=
 # TODO
 
-UNIT_TEST_OUT=elevatorSimTests.exe
-OUT=elevatorSim.exe
-MAPFILE=elevatorSim.map
-PDBFILE=elevatorSim.pdb
+DBG_UNIT_TEST_OUT=elevatorSimTests_d.exe
+DBG_OUT=elevatorSim_d.exe
+DBG_MAPFILE=elevatorSim_d.map
+DBG_PDBFILE=elevatorSim_d.pdb
+
 RESFILE=elevatorSim.res
 RCFILE=elevatorSim.rc
 
-debug: $(OUT)
+debug: $(DBG_OUT)
 
-$(OUT): $(OBJS) $(RESFILE) $(UNIT_TEST_OUT) makefile.x86.winnt.msvc2010
+$(DBG_OUT): $(DBG_OBJS) $(RESFILE) $(DBG_UNIT_TEST_OUT) makefile.x86.winnt.msvc2010
 	cl\
-$(OBJS)\
+$(DBG_OBJS)\
 $(DEBUGFLAGS)\
 $(DRIVERFLAGS)\
-/Fd$(PDBFILE)\
-/Fm$(MAPFILE)\
-/Fe$(OUT)\
+/Fd$(DBG_PDBFILE)\
+/Fm$(DBG_MAPFILE)\
+/Fe$(DBG_OUT)\
 /link\
 $(LINKFLAGS)\
+$(DBG_COOKEDDEPS)\
 $(SYSDEPS)\
-$(RESFILE)\
-$(DEBUG_COOKEDDEPS)
+$(RESFILE)
 	@echo + main binary build success
 	@echo + running unit tests
 	$(UNIT_TEST_OUT)
 	@echo + success
 
-{./}.cpp{$(OBJDIR)}.obj:
-	cl $(DEBUGFLAGS) $(DRIVERFLAGS) $(CXXFLAGS) $<
+{./}.cpp{$(DBG_OBJDIR)}.obj:
+	cl $(DRIVERFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $< /Fo$@
 
 $(RESFILE): $(RCFILE)
    rc /nologo /v /r $(RCFILE)
-   
-$(UNIT_TEST_OUT): $(UNIT_TEST_OBJS) $(SIM_OBJS)
+
+$(DBG_UNIT_TEST_OUT): $(DBG_UNIT_TEST_OBJS) $(DBG_SIM_OBJS)
 	cl\
-$(UNIT_TEST_OBJS)\
-$(SIM_OBJS)\
+$(DBG_UNIT_TEST_OBJS)\
+$(DBG_SIM_OBJS)\
 $(DEBUGFLAGS)\
 $(DRIVERFLAGS)\
-/Fe$(UNIT_TEST_OUT)\
+/Fe$(DBG_UNIT_TEST_OUT)\
 /link\
 $(LINKFLAGS)\
 $(SYSDEPS)\
-$(DEBUG_COOKEDDEPS)
+$(DBG_COOKEDDEPS)
 	@echo + unit test build success
 
 clean:
-	@erase /f /q $(OBJS) $(OUT) $(UNIT_TEST_OUT) $(UNIT_TEST_OBJS) $(MAPFILE) $(PDBFILE) $(RESFILE)
+	@erase /f /q $(DBG_OBJS) $(DBG_OUT) $(DBG_UNIT_TEST_OUT) $(DBG_UNIT_TEST_OBJS) $(DBG_MAPFILE) $(DBG_PDBFILE) $(RESFILE)
 	@echo + clean
