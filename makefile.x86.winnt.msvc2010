@@ -5,9 +5,13 @@
 ## compiler: msvc2010
 
 DBG_OBJDIR=.\debug
+REL_OBJDIR=.\release
 
 DBG_CLIENT_OBJ=\
 $(DBG_OBJDIR)\ElevatorSim.obj
+
+REL_CLIENT_OBJ=\
+$(REL_OBJDIR)\ElevatorSim.obj
 
 DBG_SIM_OBJS=\
 $(DBG_OBJDIR)\ElevatorSimWindow.obj\
@@ -30,6 +34,27 @@ $(DBG_OBJDIR)\IPersonCarrier.obj\
 $(DBG_OBJDIR)\Logger.obj\
 $(DBG_OBJDIR)\SimulationState.obj
 
+REL_SIM_OBJS=\
+$(REL_OBJDIR)\ElevatorSimWindow.obj\
+$(REL_OBJDIR)\ElevatorSimRenderWindow.obj\
+$(REL_OBJDIR)\ElevatorSimWelcomeWindow.obj\
+$(REL_OBJDIR)\ElevatorSimStartWindow.obj\
+$(REL_OBJDIR)\ElevatorSimResultsWindow.obj\
+$(REL_OBJDIR)\cRenderObjs.obj\
+$(REL_OBJDIR)\cTimeManager.obj\
+$(REL_OBJDIR)\cKeyManager.obj\
+$(REL_OBJDIR)\cCameraManager.obj\
+$(REL_OBJDIR)\Elevator.obj\
+$(REL_OBJDIR)\Location.obj\
+$(REL_OBJDIR)\Person.obj\
+$(REL_OBJDIR)\Building.obj\
+$(REL_OBJDIR)\Floor.obj\
+$(REL_OBJDIR)\ISimulationTerminal.obj\
+$(REL_OBJDIR)\IStateObject.obj\
+$(REL_OBJDIR)\IPersonCarrier.obj\
+$(REL_OBJDIR)\Logger.obj\
+$(REL_OBJDIR)\SimulationState.obj
+
 DBG_UNIT_TEST_OBJS=\
 $(DBG_OBJDIR)\UnitTests.obj\
 $(DBG_OBJDIR)\ElevatorUnitTests.obj\
@@ -37,7 +62,16 @@ $(DBG_OBJDIR)\FloorUnitTests.obj\
 $(DBG_OBJDIR)\PersonUnitTests.obj\
 $(DBG_OBJDIR)\BuildingIntegrationTests.obj
 
+REL_UNIT_TEST_OBJS=\
+$(REL_OBJDIR)\UnitTests.obj\
+$(REL_OBJDIR)\ElevatorUnitTests.obj\
+$(REL_OBJDIR)\FloorUnitTests.obj\
+$(REL_OBJDIR)\PersonUnitTests.obj\
+$(REL_OBJDIR)\BuildingIntegrationTests.obj
+
 DBG_OBJS=$(DBG_CLIENT_OBJ) $(DBG_SIM_OBJS)
+
+REL_OBJS=$(REL_CLIENT_OBJ) $(REL_SIM_OBJS)
 
 DRIVERFLAGS=/errorreport:none /nologo
 
@@ -47,7 +81,7 @@ CXXFLAGS=/W4 /EHac /c /D_ES_WINNT /Iinc /Iinc\Python
 
 DEBUGFLAGS=/ZI /MDd
 
-RELEASEFLAGS=/Og /Ox /MD /DNDEBUG
+RELEASEFLAGS=/Ox /MD /DNDEBUG
 
 LINKFLAGS=/subsystem:windows\
 /libpath:deps\x86.winnt.msvc10\boost\
@@ -97,9 +131,15 @@ DBG_OUT=elevatorSim_d.exe
 DBG_MAPFILE=elevatorSim_d.map
 DBG_PDBFILE=elevatorSim_d.pdb
 
+REL_UNIT_TEST_OUT=elevatorSimTests.exe
+REL_OUT=elevatorSim.exe
+REL_MAPFILE=elevatorSim.map
+REL_PDBFILE=elevatorSim.pdb
+
 RESFILE=elevatorSim.res
 RCFILE=elevatorSim.rc
 
+release: $(REL_OUT)
 debug: $(DBG_OUT)
 
 $(DBG_OUT): $(DBG_OBJS) $(RESFILE) $(DBG_UNIT_TEST_OUT) makefile.x86.winnt.msvc2010
@@ -123,6 +163,27 @@ $(RESFILE)
 {./}.cpp{$(DBG_OBJDIR)}.obj:
 	cl $(DRIVERFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $< /Fo$@
 
+$(REL_OUT): $(REL_OBJS) $(RESFILE) $(REL_UNIT_TEST_OUT) makefile.x86.winnt.msvc2010
+	cl\
+$(REL_OBJS)\
+$(RELEASEFLAGS)\
+$(DRIVERFLAGS)\
+/Fd$(REL_PDBFILE)\
+/Fm$(REL_MAPFILE)\
+/Fe$(REL_OUT)\
+/link\
+$(LINKFLAGS)\
+$(REL_COOKEDDEPS)\
+$(SYSDEPS)\
+$(RESFILE)
+	@echo + main binary build success
+	@echo + running unit tests
+	$(REL_UNIT_TEST_OUT)
+	@echo + success
+
+{./}.cpp{$(REL_OBJDIR)}.obj:
+	cl $(DRIVERFLAGS) $(CXXFLAGS) $(RELEASEFLAGS) $< /Fo$@
+
 $(RESFILE): $(RCFILE)
    rc /nologo /v /r $(RCFILE)
 
@@ -139,6 +200,23 @@ $(SYSDEPS)\
 $(DBG_COOKEDDEPS)
 	@echo + unit test build success
 
+$(REL_UNIT_TEST_OUT): $(REL_UNIT_TEST_OBJS) $(REL_SIM_OBJS)
+	cl\
+$(REL_UNIT_TEST_OBJS)\
+$(REL_SIM_OBJS)\
+$(RELEASEFLAGS)\
+$(DRIVERFLAGS)\
+/Fe$(REL_UNIT_TEST_OUT)\
+/link\
+$(LINKFLAGS)\
+$(SYSDEPS)\
+$(REL_COOKEDDEPS)
+	@echo + unit test build success
+
 clean:
-	@erase /f /q $(DBG_OBJS) $(DBG_OUT) $(DBG_UNIT_TEST_OUT) $(DBG_UNIT_TEST_OBJS) $(DBG_MAPFILE) $(DBG_PDBFILE) $(RESFILE)
+	@erase /f /q\
+   $(DBG_OBJS) $(DBG_OUT) $(DBG_UNIT_TEST_OUT) $(DBG_UNIT_TEST_OBJS) $(DBG_MAPFILE) $(DBG_PDBFILE)\
+   $(REL_OBJS) $(REL_OUT) $(REL_UNIT_TEST_OUT) $(REL_UNIT_TEST_OBJS) $(REL_MAPFILE) $(REL_PDBFILE)\
+   $(RESFILE)
+
 	@echo + clean
