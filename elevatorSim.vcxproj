@@ -46,6 +46,7 @@
     <NMakeOutput>elevatorSim.exe</NMakeOutput>
     <NMakeCleanCommandLine>clean.bat</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <IncludePath>$(ProjectDir)inc\Python;$(ProjectDir)inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
