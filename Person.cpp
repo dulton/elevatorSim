@@ -111,7 +111,12 @@ void Person::update() {
          }
 
          /* remove ourselves from our containing elevator */
-         assert( elevatorContainer -> removePerson( this ) );
+         bool removalSucceeded = elevatorContainer -> removePerson( this );
+         (void) removalSucceeded;
+
+         /* ensure that the removal succeeded */
+         assert(removalSucceeded);
+
          elevatorContainer->peopleGetOffAnimationOn();
 
          /* for statistics tracking */

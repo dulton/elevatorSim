@@ -100,6 +100,7 @@ void Elevator::scheduleAccelsToFloor( const int srcFloor,
    assert(destfloor >= 0 &&
             destfloor < SimulationState::acquire().getBuilding().getStories() &&
             srcFloor == (yVal / Floor::YVALS_PER_FLOOR));
+   (void) srcFloor;
 
    /* height of the target floor in yVals */
    int targetFloorHeight = destfloor *  Floor::YVALS_PER_FLOOR;

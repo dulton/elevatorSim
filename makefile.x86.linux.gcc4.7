@@ -34,16 +34,29 @@ FloorUnitTests.o\
 PersonUnitTests.o\
 BuildingIntegrationTests.o
 
+DBG_OBJDIR=./debug/
+
+DBG_OBJS=$(addprefix $(DBG_OBJDIR), $(OBJS)) 
+DBG_CLIENT_OBJ=$(addprefix $(DBG_OBJDIR), $(CLIENT_OBJ))
+DBG_UNIT_TEST_OBJS=$(addprefix $(DBG_OBJDIR), $(UNIT_TEST_OBJS))
+
+REL_OBJDIR=./release/
+
+REL_OBJS=$(addprefix $(REL_OBJDIR), $(OBJS)) 
+REL_CLIENT_OBJ=$(addprefix $(REL_OBJDIR), $(CLIENT_OBJ))
+REL_UNIT_TEST_OBJS=$(addprefix $(REL_OBJDIR), $(UNIT_TEST_OBJS))
+
 ## CXXFLAGS ##
 
 WARN_CXXFLAGS=-Wall -Wextra -Werror -pedantic
 PY_CXXFLAGS=$(shell python3.3-config --includes)
-CXXFLAGS=-c -std=c++11 -D_ES_UNIX $(WARN_CXXFLAGS) $(PY_CXXFLAGS)
+FLTK_CXXFLAGS=-I$(shell fltk-config --includedir)
+CXXFLAGS=-c -std=c++11 -D_ES_UNIX $(WARN_CXXFLAGS) $(PY_CXXFLAGS) $(FLTK_CXXFLAGS)
 
 ## LDFLAGS ##
 
 PY_LDFLAGS=$(shell python3.3-config --ldflags --libs)
-FLTK_LDFLAGS=$(shell fltk-config --use-gl --ldflags)
+FLTK_LDFLAGS=$(shell fltk-config --use-gl --ldflags --libs)
 GL_LDFLAGS=-lglut -lGL -lGLU
 BOOST_LDFLAGS=-lboost_system -lboost_chrono -lboost_thread -lboost_program_options
 
@@ -52,29 +65,53 @@ LDFLAGS=-lm $(PY_LDFLAGS) $(FLTK_LDFLAGS) $(GL_LDFLAGS) $(BOOST_LDFLAGS)
 ## DBGFLAGS ##
 
 DBGFLAGS=-g
+RELFLAGS=-O3 -DNDEBUG
 
 ## FILES ##
 
 CXX=g++
 RM=rm
-OUT=elevatorSim
-UNIT_TEST_OUT=elevatorSimUnitTests
+
+DBG_OUT=elevatorSim_d
+DBG_UNIT_TEST_OUT=elevatorSimUnitTests_d
+
+REL_OUT=elevatorSim
+REL_UNIT_TEST_OUT=elevatorSimUnitTests
 
 ## RULES ##
 
 .PHONY: clean
 
-all: $(OUT)
+all: debug release
 
-$(OUT): $(OBJS) $(UNIT_TEST_OUT) $(CLIENT_OBJ)
-	@$(CXX) $(OBJS) $(CLIENT_OBJ) $(DBGFLAGS) $(LDFLAGS) -o $(OUT)
-	@./$(UNIT_TEST_OUT)
+debug: $(DBG_OUT)
+release: $(REL_OUT)
 
-$(UNIT_TEST_OUT): $(OBJS) $(UNIT_TEST_OBJS)
-	@$(CXX) $(OBJS) $(UNIT_TEST_OBJS) $(DBGFLAGS) $(LDFLAGS) -o $(UNIT_TEST_OUT)
+$(DBG_OUT): $(DBG_OBJS) $(DBG_UNIT_TEST_OUT) $(DBG_CLIENT_OBJ)
+	$(CXX) $(DBG_OBJS) $(DBG_CLIENT_OBJ) $(LDFLAGS) -o $(DBG_OUT)
+	@./$(DBG_UNIT_TEST_OUT)
 
-.cpp.o:
-	@$(CXX) $(DBGFLAGS) $(CXXFLAGS) $< && echo CXX $<
+$(REL_OUT): $(REL_OBJS) $(REL_UNIT_TEST_OUT) $(REL_CLIENT_OBJ)
+	$(CXX) $(REL_OBJS) $(REL_CLIENT_OBJ) $(LDFLAGS) -o $(REL_OUT)
+	@./$(REL_UNIT_TEST_OUT)
+
+$(DBG_UNIT_TEST_OUT): $(DBG_OBJS) $(DBG_UNIT_TEST_OBJS)
+	@$(CXX) $(DBG_OBJS) $(DBG_UNIT_TEST_OBJS) $(DBGFLAGS) $(LDFLAGS) -o $(DBG_UNIT_TEST_OUT)
+
+$(REL_UNIT_TEST_OUT): $(REL_OBJS) $(REL_UNIT_TEST_OBJS)
+	@$(CXX) $(REL_OBJS) $(REL_UNIT_TEST_OBJS) $(RELFLAGS) $(LDFLAGS) -o $(REL_UNIT_TEST_OUT)
+
+$(DBG_OBJDIR)%.o: %.cpp
+	@$(CXX) $(DBGFLAGS) $(CXXFLAGS) $< -o $@ &&\
+	$(CXX) $(DBGFLAGS) $(CXXFLAGS) -S $< -o $@.asm &&\
+	echo CXX $< for debug
+
+$(REL_OBJDIR)%.o: %.cpp
+	@$(CXX) $(RELFLAGS) $(CXXFLAGS) $< -o $@ &&\
+	$(CXX) $(RELFLAGS) $(CXXFLAGS) -S $< -o $@.asm &&\
+	echo CXX $< for release
 
 clean:
-	@$(RM) -f $(OBJS) $(CLIENT_OBJ) $(UNIT_TEST_OBJS) $(OUT) $(UNIT_TEST_OUT)
+	@$(RM) -f\
+ $(DBG_OBJS) $(DBG_CLIENT_OBJ) $(DBG_UNIT_TEST_OBJS) $(DBG_OUT) $(DBG_UNIT_TEST_OUT)\
+ $(REL_OBJS) $(REL_CLIENT_OBJ) $(REL_UNIT_TEST_OBJS) $(REL_OUT) $(REL_UNIT_TEST_OUT)
