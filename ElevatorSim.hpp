@@ -68,6 +68,7 @@
 #include <unistd.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+#include <GLUT/glut.h>
 #elif defined(_ES_UNIX)
 #include <unistd.h>
 #include <GL/glut.h>
