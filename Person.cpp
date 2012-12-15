@@ -151,15 +151,17 @@ void Person::update() {
 
          /* move ourselves to this elevator */
          elevatorToBoard -> addPerson( this );
-         elevatorToBoard->peopleGetOnAnimationOn();
+         elevatorToBoard -> peopleGetOnAnimationOn();
 
          /* for statistics tracking */
          simState.saveEntranceUnsafe(1);
 
          /* remove ourselves from our containing floor */
-         assert( floorContainer -> removePerson( this ) );
+         bool removalSucceeded = floorContainer -> removePerson( this );
+         assert( removalSucceeded );
+         (void) removalSucceeded;
       }
-   } 
+   }
 }
 
 void Person::updateTuple() {

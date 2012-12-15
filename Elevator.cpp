@@ -96,15 +96,13 @@ Elevator::Elevator(
 
 void Elevator::scheduleAccelsToFloor( const int srcFloor,
          const int destfloor ) {
-   SimulationState& simState = SimulationState::acquire();
 
    assert(destfloor >= 0 &&
-            destfloor < simState.getBuilding().getStories() &&
+            destfloor < SimulationState::acquire().getBuilding().getStories() &&
             srcFloor == (yVal / Floor::YVALS_PER_FLOOR));
 
    /* height of the target floor in yVals */
    int targetFloorHeight = destfloor *  Floor::YVALS_PER_FLOOR;
-   int thisFloorHeight = srcFloor *  Floor::YVALS_PER_FLOOR;
 
    /* the distance traveled at the maximum speed */
    int maxVelTimeInterval =
@@ -116,8 +114,9 @@ void Elevator::scheduleAccelsToFloor( const int srcFloor,
 
    /* ensure that the total distance scheduled to be traveled is exactly
     * equal to the different in heights between current and distination */
+
    assert(maxVelTimeInterval * maxVel + 2 * stoppingDistance ==
-            abs(targetFloorHeight - thisFloorHeight));
+            abs(targetFloorHeight - (srcFloor *  Floor::YVALS_PER_FLOOR)));
 
    /* print debug info */
    if(isDebugBuild()) {
