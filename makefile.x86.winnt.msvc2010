@@ -81,7 +81,7 @@ CXXFLAGS=/W4 /EHac /c /D_ES_WINNT /Iinc /Iinc\Python
 
 DEBUGFLAGS=/ZI /MDd
 
-RELEASEFLAGS=/Ox /MD /DNDEBUG
+RELEASEFLAGS=/GL /Ox /MD /DNDEBUG
 
 LINKFLAGS=/subsystem:windows\
 /libpath:deps\x86.winnt.msvc10\boost\
@@ -91,6 +91,8 @@ LINKFLAGS=/subsystem:windows\
 /nodefaultlib:"libcmt"\
 /dynamicbase\
 /machine:X86
+
+LTCG_LINKFLAGS=/LTCG:status /LTCG
 
 SYSDEPS=\
 "comctl32.lib"\
@@ -184,6 +186,7 @@ $(DRIVERFLAGS)\
 /Fe$(REL_OUT)\
 /link\
 $(LINKFLAGS)\
+$(LTCG_LINKFLAGS)\
 $(REL_COOKEDDEPS)\
 $(SYSDEPS)\
 $(RESFILE)
@@ -220,6 +223,7 @@ $(DRIVERFLAGS)\
 /Fe$(REL_UNIT_TEST_OUT)\
 /link\
 $(LINKFLAGS)\
+$(LTCG_LINKFLAGS)\
 $(SYSDEPS)\
 $(REL_COOKEDDEPS)
 	@echo + unit test build success
