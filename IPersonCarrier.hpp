@@ -70,6 +70,7 @@ public:
 
       /* ensure that the add succeeded */
       assert(ret.second);
+      (void) ret;
    }
 
    bool removePerson( Person* p ) {
