@@ -33,17 +33,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>build.bat</NMakeBuildCommandLine>
-    <NMakeOutput>elevatorSim.exe</NMakeOutput>
+    <NMakeBuildCommandLine>nmake /f makefile.x86.winnt.msvc2010 debug</NMakeBuildCommandLine>
+    <NMakeOutput>elevatorSim_d.exe</NMakeOutput>
     <NMakeCleanCommandLine>clean.bat</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <IncludePath>$(ProjectDir)inc;$(ProjectDir)inc\Python;$(IncludePath)</IncludePath>
-    <NMakeReBuildCommandLine>clean.bat &amp;&amp; build.bat</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>
+    </NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>build.bat</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>nmake /f makefile.x86.winnt.msvc2010 release</NMakeBuildCommandLine>
     <NMakeOutput>elevatorSim.exe</NMakeOutput>
-    <NMakeCleanCommandLine>erase /f /q elevatorSim.exe elevatorSim.map elevatorSim.pdb </NMakeCleanCommandLine>
+    <NMakeCleanCommandLine>clean.bat</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>
