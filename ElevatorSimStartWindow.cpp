@@ -62,6 +62,9 @@ bool ElevatorSimStartWindow::validateSimulationParams(
          const std::string& pyAiPath) {
 
    if( numElev < 1 || numFloor <= 1 || rSeed == 0 ) {
+
+      /* TODO: dialog */
+
       return false;
    }
 
@@ -70,6 +73,8 @@ bool ElevatorSimStartWindow::validateSimulationParams(
 
       LOG_ERROR( Logger::SUB_GENERAL,
                "failed to open input file: " + pyAiPath );
+
+      /* TODO: dialog */
 
       return false;
    }
@@ -144,6 +149,8 @@ void ElevatorSimStartWindow::inputAcceptCB(Fl_Window* w, void* userData) {
    } catch ( boost::bad_lexical_cast& ) {
       LOG_ERROR( Logger::SUB_ELEVATOR_LOGIC,
                "failed to parse input parameters");
+
+      /* TODO: dialog */
    }
 }
 
