@@ -67,7 +67,7 @@ class Floor :
    bool signalingDown;
 
    /* private const instance members */
-   const int thisFloor;
+   const int thisFloorOrdinal;
    const GLfloat gfxScaleWidth;
    const bool hasUpperFloor;
    const bool hasLowerFloor;
@@ -77,7 +77,7 @@ class Floor :
    /* constructors */
    Floor(
             int _yVal,
-            int _thisFloor,
+            int _thisFloorOrdinal,
             float _gfxScaleWidth,
             bool _hasUpperFloor = false,
             bool _hasLowerFloor = false  );
