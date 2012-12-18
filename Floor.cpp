@@ -52,12 +52,12 @@ const int Floor::YVALS_PER_FLOOR = 5040;
 /* constructors */
 Floor::Floor(
          int _yVal,
-         int _thisFloor,
+         int _thisFloorOrdinal,
          float _gfxScaleWidth,
          bool _hasUpperFloor,
          bool _hasLowerFloor) :
                   Location(_yVal),
-                  thisFloor(_thisFloor),
+                  thisFloorOrdinal(_thisFloorOrdinal),
                   gfxScaleWidth(_gfxScaleWidth),
                   hasUpperFloor(_hasUpperFloor),
                   hasLowerFloor(_hasLowerFloor)  {
@@ -185,7 +185,7 @@ void Floor::update() {
 
       /* if the person was getting off on this floor, remove them */
       if(currentMutablePerson->getDestinationYVal()
-               == thisFloor * Floor::YVALS_PER_FLOOR )  {
+               == thisFloorOrdinal * Floor::YVALS_PER_FLOOR )  {
 
          people.erase(iter++);
 
@@ -211,10 +211,10 @@ void Floor::updateSignalArrows() {
    while(iter != people.end()) {
       const Person* currentPerson = *iter;
       if(currentPerson->getDestinationYVal()
-               - thisFloor > 0) {
+               - thisFloorOrdinal * Floor::YVALS_PER_FLOOR > 0) {
          signalingUp = true;
       } else if(currentPerson->getDestinationYVal()
-               - thisFloor < 0) {
+               - thisFloorOrdinal * Floor::YVALS_PER_FLOOR < 0) {
          signalingDown = true;
       }
 
