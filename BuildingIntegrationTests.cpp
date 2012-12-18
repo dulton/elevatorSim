@@ -74,11 +74,16 @@ BOOST_FIXTURE_TEST_CASE(
       BOOST_REQUIRE_EQUAL(
          testBuilding->getMaxElev(),
          testElevCount );
+
+      BOOST_REQUIRE_EQUAL(
+         testBuilding->getFloors().size(),
+         (unsigned int) testStoryCount);
 }
 
 BOOST_FIXTURE_TEST_CASE( 
    building_another_test, elevatorSim::BuildingFixture ) {
-    BOOST_REQUIRE_EQUAL(1, 1); /* TODO: stub */
+
+   BOOST_REQUIRE_EQUAL(1, 1); /* TODO: stub */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
