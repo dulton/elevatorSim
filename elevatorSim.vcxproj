@@ -74,6 +74,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Person.cpp" />
     <ClCompile Include="PersonUnitTests.cpp" />
+    <ClCompile Include="PythonSystemsTests.cpp" />
     <ClCompile Include="SimulationState.cpp" />
     <ClCompile Include="UnitTests.cpp" />
   </ItemGroup>

@@ -60,14 +60,16 @@ $(DBG_OBJDIR)\UnitTests.obj\
 $(DBG_OBJDIR)\ElevatorUnitTests.obj\
 $(DBG_OBJDIR)\FloorUnitTests.obj\
 $(DBG_OBJDIR)\PersonUnitTests.obj\
-$(DBG_OBJDIR)\BuildingIntegrationTests.obj
+$(DBG_OBJDIR)\BuildingIntegrationTests.obj\
+$(DBG_OBJDIR)\PythonSystemsTests.obj
 
 REL_UNIT_TEST_OBJS=\
 $(REL_OBJDIR)\UnitTests.obj\
 $(REL_OBJDIR)\ElevatorUnitTests.obj\
 $(REL_OBJDIR)\FloorUnitTests.obj\
 $(REL_OBJDIR)\PersonUnitTests.obj\
-$(REL_OBJDIR)\BuildingIntegrationTests.obj
+$(REL_OBJDIR)\BuildingIntegrationTests.obj\
+$(REL_OBJDIR)\PythonSystemsTests.obj
 
 DBG_OBJS=$(DBG_CLIENT_OBJ) $(DBG_SIM_OBJS)
 

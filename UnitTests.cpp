@@ -38,6 +38,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 static const char UNIT_TEST_LOGFILE_NAME[] = "ElevatorSimUnitTests.log";
 
@@ -63,6 +64,7 @@ struct ElevatorSimUnitTestConfig {
    ~ElevatorSimUnitTestConfig() {
       boost::unit_test::unit_test_log.set_stream( std::cout );
       elevatorSim::Logger::release();
+      Py_Finalize();
    }
 
    std::ofstream test_log;
@@ -73,6 +75,8 @@ boost::unit_test::test_suite* init_unit_test_suite( int argc, char* argv[] ) {
    (void)argv;
 
    elevatorSim::Logger::acquire();
+   Py_Initialize();
+
    return NULL;
 }
 
