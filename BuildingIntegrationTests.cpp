@@ -80,10 +80,14 @@ BOOST_FIXTURE_TEST_CASE(
          (unsigned int) testStoryCount);
 }
 
-BOOST_FIXTURE_TEST_CASE( 
-   building_another_test, elevatorSim::BuildingFixture ) {
+BOOST_FIXTURE_TEST_CASE(
+   building_memory_error_test, elevatorSim::BuildingFixture ) {
 
-   BOOST_REQUIRE_EQUAL(1, 1); /* TODO: stub */
+      const int TEST_ITER_COUNT = 1000;
+
+      testBuilding->init();
+
+      /* TODO: more checks */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
