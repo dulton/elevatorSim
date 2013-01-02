@@ -168,7 +168,7 @@ void ElevatorSimWindow::startSimCB(Fl_Widget* w, void* userData) {
                << " and userData " << userData << std::endl;
    }
 
-   Fl_Button* startButton = (Fl_Button*)w;
+   Fl_Button* startButton = (Fl_Button*) w;
 
    if(startButton->value()) {
       if(isDebugBuild() ) {
@@ -190,7 +190,7 @@ void ElevatorSimWindow::pauseSimCB(Fl_Widget* w, void* userData) {
       LOG_INFO( Logger::SUB_FLTK, sstreamToBuffer(dbgSS) );
    }
 
-   Fl_Button* pauseButton = (Fl_Button*)w;
+   Fl_Button* pauseButton = (Fl_Button*) w;
 
    if(pauseButton->value()) {
       if(isDebugBuild()) {
@@ -199,11 +199,7 @@ void ElevatorSimWindow::pauseSimCB(Fl_Widget* w, void* userData) {
          LOG_INFO( Logger::SUB_FLTK, sstreamToBuffer(dbgSS) );
       }
 
-      if( SimulationState::acquire().togglePause() ) {
-         w->label("Resume");
-      } else {
-         w->label("Pause");
-      }
+      SimulationState::acquire().togglePause();
    }
 }
 
@@ -320,11 +316,11 @@ void ElevatorSimWindow::buildMenu() {
 }
 
 void ElevatorSimWindow::buildButtons() {
-   startButton = new Fl_Button(10, 35, 100, 20, "Begin");
-   pauseButton = new Fl_Button(10, 65, 100, 20, "Pause");
-   stopButton = new Fl_Button(10, 95, 100, 20, "Stop");
+   startButton = new Fl_Button(10, 35, 42, 42, "@+5>");
+   pauseButton = new Fl_Button(10, 87, 42, 42, "@+5||");
+   stopButton = new Fl_Button(10, 139, 42, 42, "@+5square");
 
-   startButton ->when( FL_LEFT_MOUSE);
+   startButton ->when(FL_LEFT_MOUSE);
    pauseButton->when(FL_LEFT_MOUSE);
    stopButton->when(FL_LEFT_MOUSE);
 
@@ -440,7 +436,6 @@ void ElevatorSimWindow::updateButtonAvailability() {
       startButton->deactivate();
       stopButton->activate();
       pauseButton->activate();
-      pauseButton->label("Pause");
       break;
 
    case SimulationState::SIMULATION_READY:
@@ -453,7 +448,6 @@ void ElevatorSimWindow::updateButtonAvailability() {
       startButton->deactivate();
       stopButton->activate();
       pauseButton->activate();
-      pauseButton->label("Resume");
       break;
 
    default:

@@ -46,7 +46,7 @@
 
 namespace elevatorSim {
 
-const int ElevatorSimRenderWindow::LEFT_MARGIN = 120;
+const int ElevatorSimRenderWindow::LEFT_MARGIN = 62;
 const int ElevatorSimRenderWindow::RIGHT_MARGIN = 8;
 const int ElevatorSimRenderWindow::TOP_MARGIN = 28;
 const int ElevatorSimRenderWindow::BOTTOM_MARGIN = 8;
